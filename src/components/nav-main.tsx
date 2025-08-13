@@ -36,7 +36,7 @@ export function NavMain({
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>Management Menu</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
           const isActiveMain = location.pathname === item.url
@@ -54,7 +54,7 @@ export function NavMain({
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton
                     tooltip={item.title}
-                    className={isActiveMain ? "bg-accent text-accent-foreground" : ""}
+                    className={isActiveMain ? "bg-asa/20 text-accent-foreground transition-colors" : ""}
                   >
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
@@ -67,7 +67,7 @@ export function NavMain({
                       const isActiveSub = location.pathname === subItem.url
                       return (
                         <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton asChild className={isActiveSub ? "bg-accent text-accent-foreground" : ""}>
+                          <SidebarMenuSubButton asChild className={isActiveSub ? "bg-asa/20 text-accent-foreground transition-colors" : ""}>
                             <Link to={subItem.url}>
                               <span>{subItem.title}</span>
                             </Link>
@@ -85,7 +85,7 @@ export function NavMain({
               <SidebarMenuButton
                 asChild
                 tooltip={item.title}
-                className={isActiveMain ? "bg-blue-100 text-accent-foreground" : ""}
+                className={isActiveMain ? "bg-asa/20 text-accent-foreground transition-colors" : ""}
               >
                 <Link to={item.url}>
                   {item.icon && <item.icon />}

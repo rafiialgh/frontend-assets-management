@@ -51,7 +51,7 @@ const data = {
     },
     {
       title: 'Master Data',
-      url: '#',
+      url: '/master-data',
       icon: HardDrive,
       items: [
         {

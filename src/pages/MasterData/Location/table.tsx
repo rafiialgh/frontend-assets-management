@@ -100,24 +100,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className='space-y-4'>
-      <div className='flex items-center justify-between'>
-        <Select
-          onValueChange={(value) =>
-            table
-              .getColumn('role')
-              ?.setFilterValue(value === 'all' ? undefined : value)
-          }
-        >
-          <SelectTrigger className='w-fit'>
-            <SelectValue placeholder='Role' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='all'>All</SelectItem>
-            <SelectItem value='admin'>Admin</SelectItem>
-            <SelectItem value='superadmin'>Super Admin</SelectItem>
-            <SelectItem value='maintenance'>Maintenance</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className='flex items-center justify-end'>
         <div className='relative w-full max-w-sm'>
           <Search className='absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4' />
           <Input

@@ -1,17 +1,21 @@
-import type { User } from '@/services/auth/auth.type';
 import type { ColumnDef } from '@tanstack/react-table';
 import ActionColumns from './ActionColumns';
-import { Badge } from '@/components/ui/badge';
+import { Badge, badgeVariants } from '@/components/ui/badge';
+import type { VariantProps } from 'class-variance-authority';
+import { formatDateTime } from '@/lib/utils';
+import type { UserType } from '@/services/user/user.type';
 
-const roleVariant: Record<string, string> = {
-  admin: 'bg-[#277292] text-white hover:bg-[#277292]/90',
-  superadmin: 'bg-[#163551] text-white hover:bg-[#163551]/90',
-  maintenance: 'bg-[#D1A061] text-white hover:bg-[#D1A061]/90',
+type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
+
+const roleVariant: Record<string, BadgeVariant> = {
+  admin: 'admin',
+  superadmin: 'superadmin',
+  maintenance: 'maintenance',
 };
 
-export const columns: ColumnDef<User>[] = [
+export const columns: ColumnDef<UserType>[] = [
   {
-    accessorKey: '_id',
+    accessorKey: 'id',
     header: 'ID',
   },
   {
@@ -26,7 +30,7 @@ export const columns: ColumnDef<User>[] = [
     accessorKey: 'role',
     header: 'Role',
     cell: ({ row }) => (
-      <Badge className={roleVariant[row.original.role]}>
+      <Badge variant={roleVariant[row.original.role]}>
         {row.original.role}
       </Badge>
     ),
@@ -34,6 +38,26 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: 'lastLogin',
     header: 'Last Login',
+    cell: ({ row }) => formatDateTime(row.original.lastLogin),
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status',
+    cell: ({ row }) => {
+      const status = row.original.status;
+
+      return (
+        <span
+          className={
+            status == 'Online'
+              ? 'text-green-500 font-medium'
+              : 'text-gray-500 font-medium'
+          }
+        >
+          {status}
+        </span>
+      );
+    },
   },
   {
     id: 'actions',

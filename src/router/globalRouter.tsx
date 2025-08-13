@@ -1,19 +1,21 @@
-import type { RouteObject } from "react-router-dom";
-import LoginPage from "../pages/LoginPage";
-import RegisterPage from "@/pages/RegisterPage";
-import RootLayout from "@/components/RootLayout";
-import Dashboard from "@/pages/Dashboard";
-import UserPage from "@/pages/MasterData/User";
-import LocationPage from "@/pages/MasterData/Location";
+import type { RouteObject } from 'react-router-dom';
+import LoginPage from '../pages/LoginPage';
+import RegisterPage from '@/pages/RegisterPage';
+import RootLayout from '@/components/RootLayout';
+import Dashboard from '@/pages/Dashboard';
+import UserPage from '@/pages/MasterData/User';
+import LocationPage from '@/pages/MasterData/Location';
+import EmptyLayout from '@/components/EmptyLayout';
+import { getAllUser } from '@/services/auth/auth.service';
 
 const globalRoutes: RouteObject[] = [
   {
     path: '/login',
-    element: <LoginPage />
-  }, 
+    element: <LoginPage />,
+  },
   {
     path: '/register',
-    element: <RegisterPage />
+    element: <RegisterPage />,
   },
   {
     path: '/',
@@ -21,18 +23,37 @@ const globalRoutes: RouteObject[] = [
     children: [
       {
         index: true,
-        element: <Dashboard />
+        element: <Dashboard />,
+        handle: { breadcrumb: 'Dashboard' },
       },
       {
-        path: '/user',
-        element: <UserPage />
-      },
-      {
-        path: '/location',
-        element: <LocationPage />
-      }
-    ]
-  }
-]
+        path: '/',
+        element: <EmptyLayout />,
+        handle: { breadcrumb: 'Master Data' },
+        children: [
+          {
+            path: 'user',
+            loader: async () => {
+              const users = await getAllUser();
 
-export default globalRoutes
+              return {
+                data: users.data, // array user
+                summary: users.summary, // ringkasan
+                pagination: users.pagination, // opsional kalau mau
+              };
+            },
+            element: <UserPage />,
+            handle: { breadcrumb: 'Users' },
+          },
+          {
+            path: 'location',
+            element: <LocationPage />,
+            handle: { breadcrumb: 'Locations' },
+          },
+        ],
+      },
+    ],
+  },
+];
+
+export default globalRoutes;

@@ -82,6 +82,8 @@ button:focus-visible {
 
   --radius-xl: calc(var(--radius) + 4px);
 
+  --color-asa: var(--asa);
+
   --color-background: var(--background);
 
   --color-foreground: var(--foreground);
@@ -146,6 +148,8 @@ button:focus-visible {
 }
 
 :root {
+
+  --asa: #277292;
 
   --radius: 0.625rem;
 
