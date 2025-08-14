@@ -1,11 +1,15 @@
+import { MultiSelectCategories } from '@/components/multi-select-categories';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { locationSchema, type LocationValues } from '@/services/location/location.service';
+import {
+  locationSchema,
+  type LocationValues,
+} from '@/services/location/location.service';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Label } from '@radix-ui/react-label';
 import { X } from 'lucide-react';
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 interface UserFormProps extends React.ComponentProps<'form'> {
@@ -22,6 +26,8 @@ export default function LocationForm({
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<LocationValues>({
     resolver: zodResolver(locationSchema),
@@ -63,29 +69,29 @@ export default function LocationForm({
                 <Input
                   id='name'
                   type='name'
-                  placeholder='e.g. Gudang 1'
+                  placeholder='e.g Gudang 1'
                   {...register('lokasi')}
                 />
                 {errors.lokasi && (
-                  <p className='text-red-500 text-sm'>{errors.lokasi.message}</p>
+                  <p className='text-red-500 text-sm'>
+                    {errors.lokasi.message}
+                  </p>
                 )}
               </div>
-              
+
               <div className='grid gap-3'>
                 <Label htmlFor='role'>
                   Kategori Aset <span className='text-red-500'>*</span>
                 </Label>
-                <select
-                  id='role'
-                  className='border rounded-md p-2 bg-background text-sm text-gray-500'
-                  {...register('kategori')}
-                >
-                  <option value=''>Select Assets</option>
-                  <option value='admin'>Laptop</option>
-                  <option value='superadmin'>Meja</option>
-                </select>
+                <MultiSelectCategories
+                  selectedCategories={watch('kategori') || []}
+                  onCategoriesChange={(vals) => setValue('kategori', vals)}
+                  placeholder='e.g Kategori 1, Kategori 2'
+                />
                 {errors.kategori && (
-                  <p className='text-red-500 text-sm'>{errors.kategori.message}</p>
+                  <p className='text-red-500 text-sm'>
+                    {errors.kategori.message}
+                  </p>
                 )}
               </div>
               <div className='flex justify-end mt-3'>

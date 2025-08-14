@@ -11,47 +11,87 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import {
+  getUserById,
   registerSchema,
   type RegisterValues,
   signUp,
+  updateUsers,
 } from '@/services/auth/auth.service';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Label } from '@radix-ui/react-label';
-import { useMutation } from '@tanstack/react-query';
-import { X } from 'lucide-react';
-import React from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Eye, EyeOff, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import z from 'zod';
 
 interface UserFormProps extends React.ComponentProps<'form'> {
   onClose: () => void;
   show: boolean;
+  userId?: string;
 }
 
 export default function UserForm({
   className,
   onClose,
   show,
+  userId,
   ...props
 }: UserFormProps) {
+  const schema = userId
+    ? registerSchema.extend({
+        password: z.string().optional(),
+      })
+    : registerSchema.extend({
+        password: z.string().min(6, 'Password minimal 6 karakter'),
+      });
+
   const {
     register,
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm<RegisterValues>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(schema),
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+      role: undefined,
+    },
+  });
+
+  const navigate = useNavigate()
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const {
+    data: userData,
+    isFetching,
+    refetch,
+  } = useQuery({
+    queryKey: ['user', userId],
+    queryFn: () => getUserById(userId!),
+    enabled: !!userId && show,
+    refetchOnWindowFocus: false,
+    staleTime: 0,
   });
 
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: (data: RegisterValues) => signUp(data),
+    mutationFn: (data: RegisterValues) =>
+      userId === undefined ? signUp(data) : updateUsers(data, userId),
     onSuccess: (data) => {
       toast.success(data.message);
+      navigate('/user')
     },
     onError: (error: any) => {
       toast.error(
-        error?.response?.data?.message || error?.message || 'Login gagal'
+        error?.response?.data?.message ||
+          error?.message ||
+          'Gagal menambah user'
       );
     },
   });
@@ -59,8 +99,30 @@ export default function UserForm({
   const onSubmit = async (data: RegisterValues) => {
     console.log(data);
 
-    await mutateAsync(data);
+    if (userId && !data.password) {
+      const { password, ...rest } = data;
+      await mutateAsync(rest as RegisterValues);
+    } else {
+      await mutateAsync(data);
+    }
   };
+
+  useEffect(() => {
+    if (userData?.data) {
+      reset({
+        name: userData.data.name,
+        email: userData.data.email,
+        password: '',
+        role: userData.data.role as 'admin' | 'superadmin' | 'maintenance',
+      });
+    }
+  }, [userData, reset]);
+
+  useEffect(() => {
+    if (show && !!userId) {
+      refetch();
+    }
+  }, [show, userId, refetch]);
 
   return (
     <div
@@ -77,8 +139,12 @@ export default function UserForm({
           </button>
         </div>
         <div className='mt-[10px]'>
-          <p className='text-2xl font-medium'>Add User</p>
-          <p className='text-gray-400'>Assign user a role</p>
+          <p className='text-2xl font-medium'>
+            {userId ? 'Edit User' : 'Add User'}
+          </p>
+          <p className='text-gray-400'>
+            {userId ? 'Edit user info' : 'Assign user a role'}
+          </p>
         </div>
         <div>
           <form
@@ -94,7 +160,7 @@ export default function UserForm({
                 <Input
                   id='name'
                   type='name'
-                  placeholder='John Doe'
+                  placeholder={userId ? '' : 'John Doe'}
                   {...register('name')}
                 />
                 {errors.name && (
@@ -108,7 +174,7 @@ export default function UserForm({
                 <Input
                   id='email'
                   type='email'
-                  placeholder='m@example.com'
+                  placeholder={userId ? '' : 'm@example.com'}
                   {...register('email')}
                 />
                 {errors.email && (
@@ -118,14 +184,29 @@ export default function UserForm({
               <div className='grid gap-3'>
                 <div className='flex items-center'>
                   <Label htmlFor='password'>
-                    Password <span className='text-red-500'>*</span>
+                    {userId ? 'New Password (optional)' : 'Password'}{' '}
+                    <span className='text-red-500'>*</span>
                   </Label>
                 </div>
-                <Input
-                  id='password'
-                  type='password'
-                  {...register('password')}
-                />
+                <div className='relative'>
+                  <Input
+                    id='password'
+                    type={showPassword ? 'text' : 'password'}
+                    {...register('password')}
+                  />
+                  <button
+                    type='button'
+                    className='absolute inset-y-0 right-3 flex items-center'
+                    onClick={() => setShowPassword((prev) => !prev)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className='text-gray-500' size={18} />
+                    ) : (
+                      <Eye size={18} className='text-gray-500' />
+                    )}
+                  </button>
+                </div>
+
                 {errors.password && (
                   <p className='text-red-500 text-sm'>
                     {errors.password.message}
@@ -138,6 +219,7 @@ export default function UserForm({
                 </Label>
                 <Controller
                   name='role'
+                  defaultValue={undefined}
                   control={control}
                   render={({ field }) => (
                     <Select onValueChange={field.onChange} value={field.value}>
@@ -164,8 +246,21 @@ export default function UserForm({
                 )}
               </div>
               <div className='flex justify-end mt-3'>
-                <Button variant={'asa'} type='submit' className='w-fit' disabled={isPending}>
-                  {isPending ? 'Adding User...' : 'Add User'}
+                <Button
+                  variant={'asa'}
+                  type='submit'
+                  className='w-fit'
+                  disabled={isPending || isFetching}
+                >
+                  {isFetching
+                    ? 'Loading...'
+                    : userId
+                    ? isPending
+                      ? 'Updating'
+                      : 'Update User'
+                    : isPending
+                    ? 'Adding User...'
+                    : 'Add User'}
                 </Button>
               </div>
             </div>

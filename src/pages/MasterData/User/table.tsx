@@ -45,11 +45,33 @@ import { Search } from 'lucide-react';
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  pagination?: {
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+    pageSize: number;
+  };
+  isLoading: boolean;
+  roleFilter: string | undefined;
+  setRoleFilter: (value: string | undefined) => void;
+  searchFilter: string;
+  setSearchFilter: (value: string) => void;
+  page: number;
+  setPage: (page: number) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  pagination, // Ambil props baru
+  roleFilter,
+  setRoleFilter,
+  searchFilter,
+  setSearchFilter,
+  page,
+  setPage,
+  isLoading,
+
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
@@ -57,16 +79,19 @@ export function DataTable<TData, TValue>({
   const table = useReactTable({
     data,
     columns,
-    state: {
-      sorting,
-      globalFilter,
-    },
+    manualPagination: true,
+    manualFiltering: true,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
-    onGlobalFilterChange: setGlobalFilter,
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
+    // Set total halaman dan item dari props
+    pageCount: pagination?.totalPages ?? -1,
+    rowCount: pagination?.totalItems ?? -1,
+    // Gunakan state dari props
+    state: {
+      pagination: {
+        pageIndex: page - 1, // API biasanya 1-based, tanstack-table 0-based
+        pageSize: pagination?.pageSize ?? 10,
+      },
+    },
   });
 
   const pageCount = table.getPageCount();
@@ -99,13 +124,12 @@ export function DataTable<TData, TValue>({
   };
 
   return (
-    <div className='space-y-4'>
+    <div className='space-y-4 '>
       <div className='flex items-center justify-between'>
         <Select
+          value={roleFilter ?? 'all'}
           onValueChange={(value) =>
-            table
-              .getColumn('role')
-              ?.setFilterValue(value === 'all' ? undefined : value)
+            setRoleFilter(value === 'all' ? undefined : value)
           }
         >
           <SelectTrigger className='w-fit'>
@@ -123,30 +147,28 @@ export function DataTable<TData, TValue>({
           <Input
             type='text'
             placeholder='Search something'
-            value={globalFilter ?? ''}
-            onChange={(event) => setGlobalFilter(event.target.value)}
+            value={searchFilter ?? ''}
+            onChange={(event) => setSearchFilter(event.target.value)}
             className='pl-8'
           />
         </div>
       </div>
 
-      <div className='rounded-md border'>
+      <div className='rounded-md border overflow-x-auto'>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id} style={{ minWidth: header.getSize() }}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
@@ -158,7 +180,7 @@ export function DataTable<TData, TValue>({
                   data-state={row.getIsSelected() && 'selected'}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className='whitespace-nowrap'>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -173,7 +195,7 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className='h-24 text-center'
                 >
-                  No results.
+                  {isLoading ? 'Loading data..' : "No results."}
                 </TableCell>
               </TableRow>
             )}
@@ -197,7 +219,7 @@ export function DataTable<TData, TValue>({
                   href=''
                   onClick={(e) => {
                     e.preventDefault();
-                    table.previousPage();
+                    if (page > 1) setPage(page - 1);
                   }}
                   className={
                     !table.getCanPreviousPage()
@@ -231,7 +253,7 @@ export function DataTable<TData, TValue>({
                   href=''
                   onClick={(e) => {
                     e.preventDefault();
-                    table.nextPage();
+                    if (page < (pagination?.totalPages ?? 1)) setPage(page + 1);
                   }}
                   className={
                     !table.getCanNextPage()

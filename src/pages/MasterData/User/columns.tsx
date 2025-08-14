@@ -3,7 +3,7 @@ import ActionColumns from './ActionColumns';
 import { Badge, badgeVariants } from '@/components/ui/badge';
 import type { VariantProps } from 'class-variance-authority';
 import { formatDateTime } from '@/lib/utils';
-import type { UserType } from '@/services/user/user.type';
+import type { UserType } from '@/services/auth/auth.type';
 
 type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
 
@@ -65,7 +65,7 @@ export const columns: ColumnDef<UserType>[] = [
     cell: ({ row }) => {
       const user = row.original;
 
-      return <ActionColumns id={user._id} />;
+      return <ActionColumns id={user.id} />;
     },
   },
 ];

@@ -14,11 +14,9 @@ export const privateInstance = axios.create({
 
 privateInstance.interceptors.request.use((config) => {
   const session = getSession();
-  console.log(session)
 
   config.headers.Authorization = `Bearer ${session?.token}`;
   
-
   return config;
 });
 

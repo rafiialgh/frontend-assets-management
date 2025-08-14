@@ -21,10 +21,28 @@ export const columns: ColumnDef<Location>[] = [
   {
     accessorKey: 'totalAset',
     header: 'Total Aset',
+    cell: ({ row }) => {
+      const asset = row.original;
+
+      return <>{`${asset.totalAset} Aset`}</>;
+    },
   },
   {
     accessorKey: 'kategoriAset',
     header: 'Kategori Aset',
+    cell: ({ row }) => {
+      const category = row.original.kategoriAset;
+
+      return (
+        <div className='flex gap-1 flex-wrap'>
+          {category.map((cat, idx) => (
+            <Badge key={idx} variant='outline' className='capitalize'>
+              {cat}
+            </Badge>
+          ))}
+        </div>
+      );
+    },
   },
   {
     id: 'actions',

@@ -28,4 +28,15 @@ export type UsersResponse<T> = {
   success: boolean
 }
 
+export interface UserType {
+  id: string;
+  email: string;
+  name: string;
+  password?: string;
+  role: string;
+  lastLogin: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
 

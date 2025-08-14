@@ -33,15 +33,15 @@ const globalRoutes: RouteObject[] = [
         children: [
           {
             path: 'user',
-            loader: async () => {
-              const users = await getAllUser();
+            // loader: async () => {
+            //   const users = await getAllUser();
 
-              return {
-                data: users.data, // array user
-                summary: users.summary, // ringkasan
-                pagination: users.pagination, // opsional kalau mau
-              };
-            },
+            //   return {
+            //     data: users.data, // array user
+            //     summary: users.summary, // ringkasan
+            //     pagination: users.pagination, // opsional kalau mau
+            //   };
+            // },
             element: <UserPage />,
             handle: { breadcrumb: 'Users' },
           },

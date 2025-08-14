@@ -2,7 +2,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@radix-ui/react-label';
 import { cn } from '@/lib/utils';
-import AuthLayout from '@/components/authLayout';
+import AuthLayout from '@/components/AuthLayout';
 import { useForm } from 'react-hook-form';
 import { registerSchema, type RegisterValues } from '@/services/auth/auth.service';
 import { zodResolver } from '@hookform/resolvers/zod';

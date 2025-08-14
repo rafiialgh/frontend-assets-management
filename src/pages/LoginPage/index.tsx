@@ -1,10 +1,9 @@
-import { GalleryVerticalEnd } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@radix-ui/react-label';
 import { cn, SESSION_KEY } from '@/lib/utils';
-import AuthLayout from '@/components/authLayout';
+import AuthLayout from '@/components/AuthLayout';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   login,
