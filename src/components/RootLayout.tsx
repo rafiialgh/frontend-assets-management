@@ -1,7 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/app-sidebar';
 import { Link, Outlet, useLocation, useMatches } from 'react-router-dom';
-import React from 'react'
+import React from 'react';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -17,7 +17,6 @@ type CrumbMatch = {
     breadcrumb: string;
   };
 };
-
 
 export default function RootLayout() {
   const matches = useMatches() as CrumbMatch[];
@@ -37,6 +36,7 @@ export default function RootLayout() {
               <BreadcrumbList>
                 {crumbs.map((crumb, index) => {
                   const isLast = index === crumbs.length - 1;
+                  const isFirst = index === 0;
 
                   return (
                     <React.Fragment key={crumb.pathname}>
@@ -45,11 +45,15 @@ export default function RootLayout() {
                           <BreadcrumbPage>
                             {crumb.handle.breadcrumb}
                           </BreadcrumbPage>
+                        ) : isFirst ? (
+                          <span className='text-muted-foreground'>
+                            {crumb.handle.breadcrumb}
+                          </span>
                         ) : (
                           <BreadcrumbLink asChild>
-                            <p>
+                            <Link to={crumb.pathname}>
                               {crumb.handle.breadcrumb}
-                            </p>
+                            </Link>
                           </BreadcrumbLink>
                         )}
                       </BreadcrumbItem>

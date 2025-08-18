@@ -26,7 +26,7 @@ export default function UserPage() {
     queryKey: ['users', roleFilter, debouncedSearch, page, limit],
     queryFn: () =>
       getUsers({ role: roleFilter, search: debouncedSearch, page, limit }),
-    // keepPreviousData: true, // Sebaiknya diaktifkan untuk UX yang lebih baik
+    // keepPreviousData: true,
   });
 
   console.log(data);

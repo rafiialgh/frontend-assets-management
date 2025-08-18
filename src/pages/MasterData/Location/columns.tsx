@@ -1,8 +1,6 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import ActionColumns from './ActionColumns';
-import { Badge, badgeVariants } from '@/components/ui/badge';
-import type { VariantProps } from 'class-variance-authority';
-import { formatDateTime } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 import type { Location } from '@/services/location/location.type';
 
 export const columns: ColumnDef<Location>[] = [
