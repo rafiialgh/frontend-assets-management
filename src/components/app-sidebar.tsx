@@ -71,15 +71,15 @@ const data = {
       items: [
         {
           title: 'Aset',
-          url: '#',
+          url: '/aset',
         },
         {
           title: 'Perpindahan',
-          url: '#',
+          url: '/perpindahan',
         },
         {
           title: 'Notifikasi',
-          url: '#',
+          url: '/notifikasi',
         },
       ],
     },

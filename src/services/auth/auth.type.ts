@@ -40,3 +40,15 @@ export interface UserType {
   updatedAt: string;
 }
 
+export interface GetUsersParams {
+  role?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface GetUsersResponse {
+  data: UserType[];
+  pagination: Pagination;
+  summary: Summary;
+}

@@ -7,6 +7,9 @@ import UserPage from '@/pages/MasterData/User';
 import LocationPage from '@/pages/MasterData/Location';
 import EmptyLayout from '@/components/EmptyLayout';
 import { getAllUser } from '@/services/auth/auth.service';
+import Aset from '@/pages/Pelacakan Aset/Aset';
+import Perpindahan from '@/pages/Pelacakan Aset/Perpindahan';
+import Notifikasi from '@/pages/Pelacakan Aset/Notifikasi';
 
 const globalRoutes: RouteObject[] = [
   {
@@ -52,6 +55,28 @@ const globalRoutes: RouteObject[] = [
           },
         ],
       },
+      {
+        path: '/',
+        element: <EmptyLayout />,
+        handle: { breadcrumb: 'Pelacakan Aset' },
+        children: [
+          {
+            path: 'aset',
+            element: <Aset />,
+            handle: { breadcrumb: 'Aset' }
+          },
+          {
+            path: 'perpindahan',
+            element: <Perpindahan />,
+            handle: { breadcrumb: 'Perpindahan' }
+          },
+          {
+            path: 'notifikasi',
+            element: <Notifikasi />,
+            handle: { breadcrumb: 'Notifikasi' }
+          },
+        ]
+      }
     ],
   },
 ];

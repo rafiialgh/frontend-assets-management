@@ -1,6 +1,8 @@
 import type { BaseResponse } from '@/types/response';
 import { z } from 'zod';
 import type {
+  GetUsersParams,
+  GetUsersResponse,
   LoginResponse,
   Pagination,
   Summary,
@@ -9,18 +11,7 @@ import type {
 } from './auth.type';
 import { globalInstance, privateInstance } from '@/lib/axios';
 
-export interface GetUsersParams {
-  role?: string;
-  search?: string;
-  page?: number;
-  limit?: number;
-}
 
-export interface GetUsersResponse {
-  data: UserType[];
-  pagination: Pagination;
-  summary: Summary;
-}
 
 export const roles = ['admin', 'superadmin', 'maintenance'] as const;
 
@@ -28,25 +19,33 @@ export const authSchema = z.object({
   name: z.string().min(5, { message: 'Name must be at least 5 characters' }),
   email: z.email({ message: 'Invalid email address' }),
   role: z.enum(roles, { message: 'Invalid option' }),
+});
+
+export const addUserSchema = authSchema.extend({
   password: z
     .string()
     .min(6, { message: 'Password must be at least 6 characters' }),
 });
 
-export const editUserSchema = z.object({
-  name: z.string(),
-  email: z.string().email(),
-  role: z.enum(["admin", "superadmin", "maintenance"]),
-  password: z.string().optional(),
+export const editUserSchema = authSchema.extend({
+  password: z
+    .string()
+    .min(6, { message: 'Password must be at least 6 characters' })
+    .or(z.literal('')) // Izinkan string kosong
+    .optional(), // Jadikan opsional
 });
 
-export const registerSchema = authSchema;
-
-export const loginSchema = authSchema.omit({ name: true, role: true });
+export const loginSchema = authSchema.omit({ role: true, name: true }).extend({
+  password: z
+  .string()
+  .min(6, { message: 'Password must be at least 6 characters' }),
+});
 
 export type LoginValues = z.infer<typeof loginSchema>;
 
-export type RegisterValues = z.infer<typeof registerSchema>;
+export type RegisterValues = z.infer<typeof addUserSchema>;
+
+export type UpdateUserValues = z.infer<typeof editUserSchema>; 
 
 export const login = async (
   data: LoginValues
@@ -71,7 +70,7 @@ export const getUsers = async (
 export const getUserById = (id: string): Promise<BaseResponse<UserType>> =>
   privateInstance.get(`/auth/users/${id}`).then((res) => res.data);
 
-export const updateUsers = (data: RegisterValues, id: string) =>
+export const updateUsers = (data: UpdateUserValues, id: string) =>
   privateInstance.put(`/auth/users/${id}`, data).then((res) => res.data);
 
 export const deleteUsers = (id: string) =>

@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { deleteUsers } from '@/services/auth/auth.service';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Edit, Trash } from 'lucide-react';
 import { toast } from 'sonner';
 import UserForm from './form';
@@ -12,11 +12,13 @@ interface ActionColumnProps {
 
 export default function ActionColumns({ id }: ActionColumnProps) {
   const [showModal, setShowModal] = useState(false);
+  const queryClient = useQueryClient(); 
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: () => deleteUsers(id),
     onSuccess: (data) => {
       toast.success(data.message);
+      queryClient.invalidateQueries({ queryKey: ['users'] });
     },
     onError: (error: any) => {
       toast.error(
@@ -27,8 +29,7 @@ export default function ActionColumns({ id }: ActionColumnProps) {
 
   const handleDelete = async () => {
     if (!confirm('Yakin ingin hapus user ini?')) return;
-    // await mutateAsync()
-    console.log(id);
+    await mutateAsync()
   };
 
   return (

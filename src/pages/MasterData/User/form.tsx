@@ -11,15 +11,17 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import {
+  addUserSchema,
+  editUserSchema,
   getUserById,
-  registerSchema,
   type RegisterValues,
   signUp,
   updateUsers,
+  type UpdateUserValues,
 } from '@/services/auth/auth.service';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Label } from '@radix-ui/react-label';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Eye, EyeOff, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -40,13 +42,10 @@ export default function UserForm({
   userId,
   ...props
 }: UserFormProps) {
-  const schema = userId
-    ? registerSchema.extend({
-        password: z.string().optional(),
-      })
-    : registerSchema.extend({
-        password: z.string().min(6, 'Password minimal 6 karakter'),
-      });
+  const isEdit = Boolean(userId);
+  const schema = isEdit ? editUserSchema : addUserSchema;
+
+  type FormValues = RegisterValues | UpdateUserValues;
 
   const {
     register,
@@ -54,7 +53,7 @@ export default function UserForm({
     control,
     reset,
     formState: { errors },
-  } = useForm<RegisterValues>({
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: '',
@@ -64,65 +63,78 @@ export default function UserForm({
     },
   });
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
+
+  const queryClient = useQueryClient(); 
 
   const {
     data: userData,
     isFetching,
-    refetch,
   } = useQuery({
     queryKey: ['user', userId],
     queryFn: () => getUserById(userId!),
     enabled: !!userId && show,
-    refetchOnWindowFocus: false,
-    staleTime: 0,
+    // refetchOnWindowFocus: false,
+    // staleTime: 0,
   });
 
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: (data: RegisterValues) =>
-      userId === undefined ? signUp(data) : updateUsers(data, userId),
+
+    mutationFn: (data: FormValues) => {
+      if (isEdit) {
+        return updateUsers(data as UpdateUserValues, userId!);
+      }
+      return signUp(data as RegisterValues);
+    },
     onSuccess: (data) => {
       toast.success(data.message);
-      navigate('/user')
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      onClose();
     },
     onError: (error: any) => {
       toast.error(
         error?.response?.data?.message ||
           error?.message ||
-          'Gagal menambah user'
+          'Gagal memproses user'
       );
     },
   });
 
-  const onSubmit = async (data: RegisterValues) => {
-    console.log(data);
+  const onSubmit = async (data: FormValues) => {
+    const payload = { ...data };
 
-    if (userId && !data.password) {
-      const { password, ...rest } = data;
-      await mutateAsync(rest as RegisterValues);
-    } else {
-      await mutateAsync(data);
+    if (isEdit && (!payload.password || payload.password.trim() === '')) {
+      delete payload.password;
     }
+
+    await mutateAsync(payload);
   };
 
   useEffect(() => {
-    if (userData?.data) {
-      reset({
-        name: userData.data.name,
-        email: userData.data.email,
-        password: '',
-        role: userData.data.role as 'admin' | 'superadmin' | 'maintenance',
-      });
+    if (show) {
+      if (isEdit && userData?.data) {
+        reset({
+          name: userData.data.name,
+          email: userData.data.email,
+          role: userData.data.role as 'admin' | 'superadmin' | 'maintenance',
+          password: '',
+        });
+      } else if (!isEdit) {
+        reset({
+          name: '',
+          email: '',
+          role: undefined,
+          password: '',
+        });
+      }
     }
-  }, [userData, reset]);
+  }, [show, isEdit, userData, reset]);
 
-  useEffect(() => {
-    if (show && !!userId) {
-      refetch();
-    }
-  }, [show, userId, refetch]);
+  if (!show) {
+    return null;
+  }
 
   return (
     <div
@@ -131,8 +143,12 @@ export default function UserForm({
           ? 'opacity-100 pointer-events-auto'
           : 'opacity-0 pointer-events-none hidden'
       }`}
+      onClick={onClose}
     >
-      <div className='flex flex-col bg-white m-5 w-full h-fit max-w-[400px] rounded-sm p-5'>
+      <div
+        className='flex flex-col bg-white m-5 w-full h-fit max-w-[400px] rounded-sm p-5'
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className='flex justify-end'>
           <button type='button' onClick={onClose}>
             <X className='text-gray-500' />

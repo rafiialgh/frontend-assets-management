@@ -37,9 +37,11 @@ interface MultiSelectCategoriesProps {
   onCategoriesChange: (categories: string[]) => void;
   placeholder?: string;
   className?: string;
+  category: { value: string; label: string }[]
 }
 
 export function MultiSelectCategories({
+  category,
   selectedCategories,
   onCategoriesChange,
   placeholder = 'Select categories...',
@@ -116,21 +118,21 @@ export function MultiSelectCategories({
             <CommandList>
               <CommandEmpty>No category found.</CommandEmpty>
               <CommandGroup>
-                {categories.map((category) => (
+                {category.map((cat) => (
                   <CommandItem
-                    key={category.value}
-                    value={category.value}
-                    onSelect={() => handleSelect(category.value)}
+                    key={cat.value}
+                    value={cat.value}
+                    onSelect={() => handleSelect(cat.value)}
                   >
                     <Check
                       className={cn(
                         'mr-2 h-4 w-4',
-                        selectedCategories.includes(category.value)
+                        selectedCategories.includes(cat.value)
                           ? 'opacity-100'
                           : 'opacity-0'
                       )}
                     />
-                    {category.label}
+                    {cat.label}
                   </CommandItem>
                 ))}
               </CommandGroup>

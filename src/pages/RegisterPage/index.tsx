@@ -4,7 +4,7 @@ import { Label } from '@radix-ui/react-label';
 import { cn } from '@/lib/utils';
 import AuthLayout from '@/components/AuthLayout';
 import { useForm } from 'react-hook-form';
-import { registerSchema, type RegisterValues } from '@/services/auth/auth.service';
+import { addUserSchema, type RegisterValues } from '@/services/auth/auth.service';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 export default function RegisterPage({
@@ -16,7 +16,7 @@ export default function RegisterPage({
     handleSubmit,
     formState: { errors }
   } = useForm<RegisterValues>({
-    resolver: zodResolver(registerSchema)
+    resolver: zodResolver(addUserSchema)
   })
 
   const onSubmit = (data: RegisterValues) => {

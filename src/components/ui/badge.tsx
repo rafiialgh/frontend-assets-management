@@ -20,6 +20,9 @@ const badgeVariants = cva(
         admin: 'bg-[#277292] text-white hover:bg-[#277292]/90 border-transparent',
         superadmin: 'bg-[#163551] text-white hover:bg-[#163551]/90 border-transparent',
         maintenance: 'bg-[#D1A061] text-white hover:bg-[#D1A061]/90 border-transparent',
+        active: 'text-green-500 border-green-500 hover:border-green-500/80 hover:text-green-500/80',
+        nonactive: 'text-gray-500 border-gray-500 hover:text-gray-500/80 hover:border-gray-500/80',
+        maintenanceOutline: 'text-[#D1A061] border-[#D1A061] hover:border-[#D1A061]/80 hover:text-[#D1A061]/80'
       },
     },
     defaultVariants: {

@@ -5,14 +5,6 @@ import type { VariantProps } from 'class-variance-authority';
 import { formatDateTime } from '@/lib/utils';
 import type { Location } from '@/services/location/location.type';
 
-type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
-
-const roleVariant: Record<string, BadgeVariant> = {
-  admin: 'admin',
-  superadmin: 'superadmin',
-  maintenance: 'maintenance',
-};
-
 export const columns: ColumnDef<Location>[] = [
   {
     accessorKey: 'lokasi',

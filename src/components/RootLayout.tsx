@@ -64,7 +64,7 @@ export default function RootLayout() {
           </header>
 
           {/* Page content */}
-          <main className='flex-1 p-5 overflow-auto'>
+          <main className='flex-1 p-5 overflow-auto bg-zinc-200/60'>
             <Outlet />
           </main>
         </div>

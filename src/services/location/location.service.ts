@@ -12,8 +12,13 @@ export const locationSchema = z.object({
 
 export type LocationValues = z.infer<typeof locationSchema>;
 
-export const getLocation = (): Promise<BaseResponse<Location[]>> =>
+export const getLocation = (): Promise<LocationResponse<Location[]>> =>
   privateInstance.get('/lokasi').then((res) => res.data);
 
-export const createLocation = (data: Location) =>
+// export const getLocationById = (id: string): Promise<L
+
+export const createLocation = (data: LocationValues) =>
   privateInstance.post('/lokasi', data).then((res) => res.data);
+
+export const deleteLocation = (id: string) =>
+  privateInstance.delete(`/lokasi/${id}`).then((res) => res.data);
