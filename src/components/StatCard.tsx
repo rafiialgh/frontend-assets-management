@@ -15,7 +15,7 @@ export const StatCard: React.FC<StatCardProps> = ({ icon: Icon, title, value }) 
         <Icon size={35} className="text-gray-400"/>
       </div>
       <div>
-        <p>{title}</p>
+        <p className="text-right">{title}</p>
         <p className="text-2xl text-right">{value}</p>
       </div>
     </div>

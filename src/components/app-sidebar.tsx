@@ -99,7 +99,7 @@ const data = {
         },
         {
           title: 'Pengadaan',
-          url: '#',
+          url: '/pengadaan',
         },
         {
           title: 'Pengeluaran',

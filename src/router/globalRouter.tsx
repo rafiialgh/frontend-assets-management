@@ -10,6 +10,7 @@ import { getAllUser } from '@/services/auth/auth.service';
 import Aset from '@/pages/Pelacakan Aset/Aset';
 import Perpindahan from '@/pages/Pelacakan Aset/Perpindahan';
 import Notifikasi from '@/pages/Pelacakan Aset/Notifikasi';
+import Pengadaan from '@/pages/Kelola Inventaris/Pengadaan';
 
 const globalRoutes: RouteObject[] = [
   {
@@ -75,6 +76,28 @@ const globalRoutes: RouteObject[] = [
             element: <Notifikasi />,
             handle: { breadcrumb: 'Notifikasi' }
           },
+        ]
+      },
+      {
+        path: '/',
+        element: <EmptyLayout />,
+        handle: { breadcrumb: 'Kelola Inventaris' },
+        children: [
+          // {
+          //   path: 'aset',
+          //   element: <Aset />,
+          //   handle: { breadcrumb: 'Aset' }
+          // },
+          {
+            path: 'pengadaan',
+            element: <Pengadaan />,
+            handle: { breadcrumb: 'Pengadaan' }
+          },
+          // {
+          //   path: 'notifikasi',
+          //   element: <Notifikasi />,
+          //   handle: { breadcrumb: 'Notifikasi' }
+          // },
         ]
       }
     ],
