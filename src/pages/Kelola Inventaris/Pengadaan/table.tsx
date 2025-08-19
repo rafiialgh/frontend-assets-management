@@ -4,268 +4,174 @@ import {
   type ColumnDef,
   flexRender,
   getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
   useReactTable,
-  type SortingState,
 } from '@tanstack/react-table';
 
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination';
-
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Pagination, PaginationContent, PaginationItem, 
+  PaginationPrevious, PaginationLink, PaginationNext, PaginationEllipsis
+ } from '@/components/ui/pagination';
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Search, ArrowDownUp } from 'lucide-react';
+import { useState, useMemo } from 'react';
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { useState } from 'react';
-import { Search } from 'lucide-react';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  pagination?: {
-    totalItems: number;
-    totalPages: number;
-    currentPage: number;
-    pageSize: number;
-  };
-  isLoading: boolean;
-  roleFilter: string | undefined;
-  setRoleFilter: (value: string | undefined) => void;
-  searchFilter: string;
-  setSearchFilter: (value: string) => void;
-  page: number;
-  setPage: (page: number) => void;
+  lokasiData?: { idLokasi: string; lokasi: string }[];
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  pagination, // Ambil props baru
-  roleFilter,
-  setRoleFilter,
-  searchFilter,
-  setSearchFilter,
-  page,
-  setPage,
-  isLoading,
-
+  lokasiData = [],
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [globalFilter, setGlobalFilter] = useState('');
+  const [recentOrder, setRecentOrder] = useState<'Recent' | 'Oldest'>('Recent');
+  const [costOrder, setCostOrder] = useState<'Cost' | 'highest' | 'lowest'>('Cost');
+  const [lokasiFilter, setLokasiFilter] = useState<string | undefined>(undefined);
+  const [searchFilter, setSearchFilter] = useState<string>('');
 
-  const table = useReactTable({
-    data,
-    columns,
-    manualPagination: true,
-    manualFiltering: true,
-    getCoreRowModel: getCoreRowModel(),
-    // Set total halaman dan item dari props
-    pageCount: pagination?.totalPages ?? -1,
-    rowCount: pagination?.totalItems ?? -1,
-    // Gunakan state dari props
-    state: {
-      pagination: {
-        pageIndex: page - 1, // API biasanya 1-based, tanstack-table 0-based
-        pageSize: pagination?.pageSize ?? 10,
-      },
-    },
-  });
+  // Apply filters + sorting
+  const filteredData = useMemo(() => {
+    let temp = [...data];
 
-  const pageCount = table.getPageCount();
-  const pageIndex = table.getState().pagination.pageIndex;
-
-  const getPageNumbers = () => {
-    const pages: (number | string)[] = [];
-
-    if (pageCount <= 2) {
-      // Kalau sedikit halaman, tampilkan semua
-      for (let i = 0; i < pageCount; i++) pages.push(i);
-    } else {
-      // Selalu tampilkan halaman pertama
-      pages.push(0);
-
-      if (pageIndex > 3) pages.push('ellipsis-prev');
-
-      const start = Math.max(1, pageIndex - 1);
-      const end = Math.min(pageCount - 2, pageIndex + 1);
-
-      for (let i = start; i <= end; i++) pages.push(i);
-
-      if (pageIndex < pageCount - 4) pages.push('ellipsis-next');
-
-      // Selalu tampilkan halaman terakhir
-      pages.push(pageCount - 1);
+    // filter lokasi
+    if (lokasiFilter) {
+      temp = temp.filter(item => item.lokasi?.lokasi === lokasiFilter);
     }
 
-    return pages;
-  };
+    // filter search
+    if (searchFilter) {
+      temp = temp.filter(
+        item =>
+          item.namaAset.toLowerCase().includes(searchFilter.toLowerCase()) ||
+          item.vendor.toLowerCase().includes(searchFilter.toLowerCase())
+      );
+    }
+
+    // cost order
+    if (costOrder !== 'Cost') {
+      temp.sort((a, b) => {
+        const costA = a.totalHarga ?? 0;
+        const costB = b.totalHarga ?? 0;
+        return costOrder === 'highest' ? costB - costA : costA - costB;
+      });
+    }
+
+    // Recent / Oldest toggle
+    if (recentOrder === 'Oldest') {
+      temp.reverse(); // backend already sends Recent first
+    }
+
+    return temp;
+  }, [data, lokasiFilter, searchFilter, costOrder, recentOrder]);
+
+  const table = useReactTable({
+    data: filteredData,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
 
   return (
-    <div className='space-y-4 '>
-      <div className='flex items-center justify-between'>
-        <Select
-          value={roleFilter ?? 'all'}
-          onValueChange={(value) =>
-            setRoleFilter(value === 'all' ? undefined : value)
-          }
-        >
-          <SelectTrigger className='w-fit'>
-            <SelectValue placeholder='Role' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='all'>All</SelectItem>
-            <SelectItem value='admin'>Admin</SelectItem>
-            <SelectItem value='superadmin'>Super Admin</SelectItem>
-            <SelectItem value='maintenance'>Maintenance</SelectItem>
-          </SelectContent>
-        </Select>
-        <div className='relative w-full max-w-sm'>
-          <Search className='absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4' />
+    <div className="space-y-4">
+      {/* Filters */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setRecentOrder(recentOrder === 'Recent' ? 'Oldest' : 'Recent')}
+            className="flex items-center gap-2 bg-transparent font-normal"
+          >
+            {recentOrder}
+            <ArrowDownUp className="size-3" />
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={() => {
+              if (costOrder === 'Cost') setCostOrder('highest');
+              else if (costOrder === 'highest') setCostOrder('lowest');
+              else setCostOrder('Cost');
+            }}
+            className="flex items-center gap-2 bg-transparent font-normal"
+          >
+            {costOrder === 'Cost' ? 'Cost' : costOrder === 'highest' ? 'Highest' : 'Lowest'}
+            <ArrowDownUp className="size-3" />
+          </Button>
+
+          <Select
+            value={lokasiFilter ?? 'all'}
+            onValueChange={value => setLokasiFilter(value === 'all' ? undefined : value)}
+          >
+            <SelectTrigger className="w-fit">
+              <SelectValue placeholder="Lokasi" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Lokasi</SelectItem>
+              {lokasiData.map(lok => (
+                <SelectItem key={lok.idLokasi} value={lok.lokasi}>
+                  {lok.lokasi}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="relative w-full max-w-sm">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
-            type='text'
-            placeholder='Search something'
-            value={searchFilter ?? ''}
-            onChange={(event) => setSearchFilter(event.target.value)}
-            className='pl-8'
+            type="text"
+            placeholder="Search by asset or vendor name"
+            value={searchFilter}
+            onChange={e => setSearchFilter(e.target.value)}
+            className="pl-8"
           />
         </div>
       </div>
 
-      <div className='rounded-md border overflow-x-auto'>
+      {/* Table */}
+      <div className="rounded-md border overflow-x-auto ">
         <Table>
           <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
+            {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} style={{ minWidth: header.getSize() }}>
+                {headerGroup.headers.map(header => (
+                  <TableHead key={header.id}>
                     {header.isPlaceholder
                       ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                      : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className='whitespace-nowrap'>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+          <TableBody >
+            {table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map(row => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map(cell => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className='h-24 text-center'
-                >
-                  {isLoading ? 'Loading data..' : "No results."}
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No results.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
+        
       </div>
-      <div className='flex items-center justify-between'>
-        <span className='flex items-center gap-1 text-sm'>
-          <div>Showing</div>
-          <p>
-            {table.getState().pagination.pageIndex + 1} of{' '}
-            {table.getPageCount()}
-          </p>
-        </span>
-
-        <div className='flex items-center justify-end space-x-2 py-4'>
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href=''
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (page > 1) setPage(page - 1);
-                  }}
-                  className={
-                    !table.getCanPreviousPage()
-                      ? 'pointer-events-none opacity-50'
-                      : ''
-                  }
-                />
-              </PaginationItem>
-              {getPageNumbers().map((p, idx) =>
-                typeof p === 'number' ? (
-                  <PaginationItem key={idx}>
-                    <PaginationLink
-                      href='#'
-                      isActive={pageIndex === p}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        table.setPageIndex(p);
-                      }}
-                    >
-                      {p + 1}
-                    </PaginationLink>
-                  </PaginationItem>
-                ) : (
-                  <PaginationItem key={idx}>
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                )
-              )}
-              <PaginationItem>
-                <PaginationNext
-                  href=''
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (page < (pagination?.totalPages ?? 1)) setPage(page + 1);
-                  }}
-                  className={
-                    !table.getCanNextPage()
-                      ? 'pointer-events-none opacity-50'
-                      : ''
-                  }
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      </div>
+    
     </div>
   );
 }

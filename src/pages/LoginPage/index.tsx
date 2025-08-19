@@ -36,7 +36,7 @@ export default function LoginPage({
   const { isPending, mutateAsync } = useMutation({
     mutationFn: (data: LoginValues) => login(data),
     onSuccess: (data) => {
-      console.log(data)
+      // console.log(data)
       toast.success(data.message);
       secureLocalStorage.setItem(SESSION_KEY, data.data);
       navigate('/')

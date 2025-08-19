@@ -1,97 +1,93 @@
-// Components
+'use client';
+
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { StatCard } from '@/components/StatCard';
 import { columns } from './columns';
 import ProcurementForm from './form';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { DataTable } from './table';
-import { StatCardSkeleton, TableSkeleton } from '@/components/Skeleton';
-
-// Icons
-import { Plus, User, Users, UserStar } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 import { Boxes, Banknote, BanknoteArrowDown, BanknoteArrowUp } from 'lucide-react';
+import { getProcurements } from '@/services/pengadaan/pengadaan.service';
+import type { Procurement } from '@/services/pengadaan/pengadaan.service';
+import { getLocation } from '@/services/location/location.service';
 
-// Data
-import { useDebounce } from '@/hooks/useDebounce';
-import { getUsers } from '@/services/auth/auth.service';
-import { useQuery } from '@tanstack/react-query';
-import type { GetUsersResponse } from '@/services/auth/auth.type';
 
-export default function UserPage() {
-  const [roleFilter, setRoleFilter] = useState<string | undefined>(undefined);
-  const [page, setPage] = useState(1);
-  const limit = 10;
+export default function ProcurementPage() {
+  const [showModal, setShowModal] = useState(false);
+  const [lokasiFilter, setLokasiFilter] = useState<string | undefined>();
+  const [searchFilter, setSearchFilter] = useState('');
+  const [recentOrder, setRecentOrder] = useState<'Oldest' | 'Recent'>('Recent');
+  const [costOrder, setCostOrder] = useState<'Cost' | 'highest' | 'lowest'>('Cost');
 
-  const [search, setSearch] = useState<string>('');
-  const debouncedSearch = useDebounce(search, 500); 
-  const { data, isLoading, error } = useQuery<GetUsersResponse>({
-    queryKey: ['users', roleFilter, debouncedSearch, page, limit],
-    queryFn: () =>
-      getUsers({ role: roleFilter, search: debouncedSearch, page, limit }),
-    // keepPreviousData: true, // Sebaiknya diaktifkan untuk UX yang lebih baik
+  // Fetch procurements
+  const { data, isLoading: isLoadingProcurements } = useQuery({
+    queryKey: ['procurements'],
+    queryFn: getProcurements,
   });
 
-  console.log(data);
+  // Fetch locations
+  const { data: lokasiRes, isLoading: isLoadingLokasi } = useQuery({
+    queryKey: ['locations'],
+    queryFn: getLocation,
+  });
 
-  const users = data?.data ?? [];
+  const lokasiData = lokasiRes?.data ?? [];
+  const procurements: Procurement[] = data?.data ?? [];
   const pagination = data?.pagination;
-  const summary = data?.summary;
 
-  // Fungsi untuk menangani perubahan filter & reset halaman ke 1
-  const handleRoleFilterChange = (value: string | undefined) => {
-    setPage(1); // Reset halaman ke 1 setiap kali filter berubah
-    setRoleFilter(value);
-  };
-
-  const handleSearchChange = (value: string) => {
-    setPage(1); // Reset halaman ke 1 setiap kali pencarian dimulai
-    setSearch(value);
-  };
-
-  const [showModal, setShowModal] = useState(false);
+  // Ambil stats dari meta
+  const totalPengadaan = data?.meta?.totalPengadaan ?? 0;
+  const totalSpend = data?.meta?.totalSpend ?? 0;
+  const highestCost = data?.meta?.highestCost?.totalHarga ?? 0;
+  const lowestCost = data?.meta?.lowestCost?.totalHarga ?? 0;
 
   return (
-    <div className='text-accent-foreground'>
-      <div className='flex justify-between'>
-        <h1 className='text-3xl font-medium'>Pengadaan</h1>
+    <div className="text-accent-foreground">
+      {/* Header */}
+      <div className="flex justify-between">
+        <h1 className="text-3xl font-medium">Pengadaan</h1>
         <Button
-          type='button'
-          variant={'asa'}
+          type="button"
+          variant="asa"
           onClick={() => setShowModal(true)}
-          className='flex justify-center items-center'
+          className="flex justify-center items-center"
         >
-          <Plus className='mr-1' size={20} />
+          <Plus className="mr-1" size={20} />
           <p>Add Pengadaan</p>
         </Button>
       </div>
 
-      <div className='mt-5 grid grid-cols-2 xl:grid-cols-4 gap-5 justify-between items-center'>
-        <StatCard icon={Boxes}  title='Total Pengadaan' value="4"/>
-        <StatCard icon={Banknote}  title='Total Spend' value="Rp 955.5K"/>
-        <StatCard icon={BanknoteArrowUp}  title='Highest Cost' value="Rp 450K"/>
-        <StatCard icon={BanknoteArrowDown}  title='Lowest Cost' value="Rp 50K"/>
-        
+      {/* Stat Cards */}
+      <div className="mt-5 grid grid-cols-2 xl:grid-cols-4 gap-5 justify-between items-center">
+        <StatCard icon={Boxes} title="Total Pengadaan" value={totalPengadaan.toString()} />
+        <StatCard icon={Banknote} title="Total Spend" value={`Rp ${totalSpend.toLocaleString()}`} />
+        <StatCard icon={BanknoteArrowUp} title="Highest Cost" value={`Rp ${highestCost.toLocaleString()}`} />
+        <StatCard icon={BanknoteArrowDown} title="Lowest Cost" value={`Rp ${lowestCost.toLocaleString()}`} />
       </div>
 
-      <div className='w-full p-5 bg-sidebar border rounded-sm mt-5'>
-        <h1 className='font-medium text-xl mb-5'>Pengadaan</h1>
-
+      {/* Data Table */}
+      <div className="w-full p-5 bg-sidebar border rounded-sm mt-5">
+        <h1 className="font-medium text-xl mb-5">Daftar Pengadaan</h1>
         <DataTable
           columns={columns}
-          data={users}
+          data={procurements}
+          lokasiData={lokasiData}
           pagination={pagination}
-          roleFilter={roleFilter}
-          setRoleFilter={handleRoleFilterChange}
-          searchFilter={search}
-          setSearchFilter={handleSearchChange}
-          page={page}
-          setPage={setPage}
-          isLoading={isLoading}
+          isLoading={isLoadingProcurements || isLoadingLokasi}
+          lokasiFilter={lokasiFilter}
+          setLokasiFilter={setLokasiFilter}
+          searchFilter={searchFilter}
+          setSearchFilter={setSearchFilter}
+          recentOrder={recentOrder}
+          setRecentOrder={setRecentOrder}
+          costOrder={costOrder}
+          setCostOrder={setCostOrder}
         />
       </div>
 
-      {/* Modal */}
+      {/* Modal Form */}
       <ProcurementForm show={showModal} onClose={() => setShowModal(false)} />
     </div>
   );

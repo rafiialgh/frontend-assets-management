@@ -7,6 +7,7 @@ export interface Procurement {
   jumlahAset: number;
   hargaSatuan: number;
   vendor: string;
+  totalHarga?: number;
 }
 
 export type Pagination = {
@@ -18,8 +19,10 @@ export type Pagination = {
 
 export type ProcurementResponse<T> = {
   data: T;
-  totalPengadaan: string;
+  totalPengadaan: number;
   pagination: Pagination;
   message: string;
   success: boolean;
+  highestCost?: Procurement;
+  lowestCost?: Procurement;
 };

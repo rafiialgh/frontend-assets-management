@@ -1,51 +1,48 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import ActionColumns from './ActionColumns';
-import { Badge, badgeVariants } from '@/components/ui/badge';
-import type { VariantProps } from 'class-variance-authority';
 import { formatDateTime } from '@/lib/utils';
-import type { UserType } from '@/services/auth/auth.type';
+import type { Procurement } from '@/services/pengadaan.type';
 
-type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
-
-const roleVariant: Record<string, BadgeVariant> = {
-  admin: 'admin',
-  superadmin: 'superadmin',
-  maintenance: 'maintenance',
-};
-
-export const columns: ColumnDef<UserType>[] = [
+export const columns: ColumnDef<Procurement>[] = [
   {
     accessorKey: 'pengadaanId',
     header: 'Purchase ID',
   },
   {
-    accessorKey: 'name',
+    accessorKey: 'tanggalBeli',
     header: 'Purchase Date',
+    cell: ({ getValue }) =>
+      new Date(getValue() as string).toLocaleDateString(),
   },
   {
-    accessorKey: 'lokasi',
+    accessorKey: 'lokasiId',
     header: 'Lokasi',
+     cell: ({ row }) => row.original.lokasi?.lokasi ?? '-',
   },
   {
     accessorKey: 'namaAset',
     header: 'Nama Aset',
   },
   {
+    accessorKey: 'jumlahAset',
+    header: 'Jumlah',
+  },
+  
+  {
     accessorKey: 'totalHarga',
-    header: 'Cost',
+    header: 'Total Harga',
+    cell: ({ getValue }) => `Rp ${(getValue() as number).toLocaleString()}`,
   },
   {
     accessorKey: 'vendor',
     header: 'Vendor',
   },
-  
   {
     id: 'actions',
     header: 'Action',
     cell: ({ row }) => {
-      const user = row.original;
-
-      return <ActionColumns id={user.id} />;
+      const procurement = row.original;
+      return <ActionColumns id={procurement.pengadaanId} />; // pakai idPengadaan
     },
   },
 ];

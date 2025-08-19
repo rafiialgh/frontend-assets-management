@@ -1,11 +1,10 @@
 import { Button } from '@/components/ui/button';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Edit, Trash } from 'lucide-react';
-import { toast } from 'sonner';
-import UserForm from './form';
+import { Edit, Eye, Trash } from 'lucide-react';
 import { useState } from 'react';
-import ProcurementForm from './form';
-import { deleteProcurement } from '@/services/pengadaan/pengadaan.service';
+// import LocationForm from './form';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { deleteLocation } from '@/services/location/location.service';
+import { toast } from 'sonner';
 
 interface ActionColumnProps {
   id: string;
@@ -13,29 +12,32 @@ interface ActionColumnProps {
 
 export default function ActionColumns({ id }: ActionColumnProps) {
   const [showModal, setShowModal] = useState(false);
-  const queryClient = useQueryClient(); 
+  const queryClient = useQueryClient();
 
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: () => deleteProcurement(id),
+    mutationFn: () => deleteLocation(id),
     onSuccess: (data) => {
       toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: ['procurements'] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
     },
     onError: (error: any) => {
       toast.error(
-        error?.response?.data?.message || error?.message || 'Hapus pengadaan gagal'
+        error?.response?.data?.message || error?.message || 'Hapus lokasi gagal'
       );
     },
   });
 
   const handleDelete = async () => {
-    if (!confirm('Yakin ingin hapus pengadaan ini?')) return;
-    await mutateAsync()
+    if (!confirm('Yakin ingin hapus user ini?')) return;
+    await mutateAsync();
   };
 
   return (
     <>
       <div className='inline-flex items-center gap-4 p-5'>
+        <Button size='sm' variant='secondary' className='hover:bg-gray-200'>
+          <Eye />
+        </Button>
         <Button
           size='sm'
           variant='secondary'
@@ -47,22 +49,22 @@ export default function ActionColumns({ id }: ActionColumnProps) {
         </Button>
         <Button
           disabled={isPending}
+          onClick={handleDelete}
           size='sm'
           variant={'secondary'}
           className='hover:bg-red-500 hover:text-white'
-          onClick={handleDelete}
         >
           <Trash className='w-4 h-4' />
           {/* Delete */}
         </Button>
       </div>
-      {showModal && (
-      <ProcurementForm
-        show={showModal}
-        onClose={() => setShowModal(false)}
-        procurementId={id}
-      />
-      )}
+      {/* {showModal && (
+        <LocationForm
+          show={showModal}
+          onClose={() => setShowModal(false)}
+          locationId={id}
+        />
+      )} */}
     </>
   );
 }

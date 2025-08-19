@@ -10,7 +10,11 @@ import { getAllUser } from '@/services/auth/auth.service';
 import Aset from '@/pages/Pelacakan Aset/Aset';
 import Perpindahan from '@/pages/Pelacakan Aset/Perpindahan';
 import Notifikasi from '@/pages/Pelacakan Aset/Notifikasi';
+
 import Pengadaan from '@/pages/Kelola Inventaris/Pengadaan';
+
+import AsetForm from '@/pages/Pelacakan Aset/Aset/form';
+
 
 const globalRoutes: RouteObject[] = [
   {
@@ -63,8 +67,19 @@ const globalRoutes: RouteObject[] = [
         children: [
           {
             path: 'aset',
-            element: <Aset />,
-            handle: { breadcrumb: 'Aset' }
+            element: <EmptyLayout />,
+            handle: { breadcrumb: 'Aset' },
+            children: [
+              {
+                index: true,
+                element: <Aset />
+              },
+              {
+                path: 'tambah',
+                element: <AsetForm />,
+                handle: { breadcrumb: 'Tambah' }
+              }
+            ]
           },
           {
             path: 'perpindahan',
