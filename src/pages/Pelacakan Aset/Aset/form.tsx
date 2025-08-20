@@ -25,6 +25,7 @@ export default function AsetForm({
     setValue,
     control,
     reset,
+    watch,
     formState: { errors },
   } = useForm<AssetValues>({
     resolver: zodResolver(AssetSchema),
@@ -44,6 +45,8 @@ export default function AsetForm({
     console.log(data);
   };
 
+  const kategoriAset = watch('kategoriAset');
+
   return (
     <div className='flex justify-center items-center text-accent-foreground'>
       <div className='flex flex-col bg-white w-full h-fit rounded-sm p-5'>
@@ -60,21 +63,26 @@ export default function AsetForm({
             className={cn('flex flex-col gap-6', className)}
             {...props}
           >
-            <div className='mt-5'>
-              <Controller
-                name='foto'
-                control={control}
-                render={({ field }) => (
-                  <ImageUpload value={field.value} onChange={field.onChange} />
+            {kategoriAset !== 'digital' && (
+              <div className='mt-5'>
+                <Controller
+                  name='foto'
+                  control={control}
+                  render={({ field }) => (
+                    <ImageUpload
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
+                />
+                {errors.foto && (
+                  <p className='text-red-500 text-sm mt-1'>
+                    {/* @ts-ignore */}
+                    {errors.foto.message}
+                  </p>
                 )}
-              />
-              {errors.foto && (
-                <p className='text-red-500 text-sm mt-1'>
-                  {/* @ts-ignore */}
-                  {errors.foto.message}
-                </p>
-              )}
-            </div>
+              </div>
+            )}
             <div className='grid grid-flow-row md:grid-flow-col md:grid-rows-5 grid-cols-1 md:grid-cols-2 gap-7 mt-5'>
               <div className='grid gap-3'>
                 <Label htmlFor='merk & tipe'>

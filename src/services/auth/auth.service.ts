@@ -4,14 +4,10 @@ import type {
   GetUsersParams,
   GetUsersResponse,
   LoginResponse,
-  Pagination,
-  Summary,
   UsersResponse,
   UserType,
 } from './auth.type';
 import { globalInstance, privateInstance } from '@/lib/axios';
-
-
 
 export const roles = ['admin', 'superadmin', 'maintenance'] as const;
 
@@ -37,15 +33,15 @@ export const editUserSchema = authSchema.extend({
 
 export const loginSchema = authSchema.omit({ role: true, name: true }).extend({
   password: z
-  .string()
-  .min(6, { message: 'Password must be at least 6 characters' }),
+    .string()
+    .min(6, { message: 'Password must be at least 6 characters' }),
 });
 
 export type LoginValues = z.infer<typeof loginSchema>;
 
 export type RegisterValues = z.infer<typeof addUserSchema>;
 
-export type UpdateUserValues = z.infer<typeof editUserSchema>; 
+export type UpdateUserValues = z.infer<typeof editUserSchema>;
 
 export const login = async (
   data: LoginValues

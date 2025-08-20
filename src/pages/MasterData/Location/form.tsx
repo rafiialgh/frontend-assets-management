@@ -2,16 +2,19 @@ import { MultiSelectCategories } from '@/components/multi-select-categories';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { getDropdown } from '@/services/global/global.service';
 import {
   createLocation,
+  getLocationById,
   locationSchema,
+  updateLocation,
   type LocationValues,
 } from '@/services/location/location.service';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Label } from '@radix-ui/react-label';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -28,11 +31,14 @@ export default function LocationForm({
   locationId,
   ...props
 }: UserFormProps) {
+  const isEdit = Boolean(locationId);
+
   const {
     register,
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm<LocationValues>({
     resolver: zodResolver(locationSchema),
@@ -42,40 +48,71 @@ export default function LocationForm({
     },
   });
 
-  const categories = [
-    { value: 'laptop', label: 'Laptop' },
-    { value: 'furniture', label: 'Furniture' },
-    { value: 'kamera', label: 'Kamera' },
-  ];
+  const { data: locationData, isLoading } = useQuery({
+    queryKey: ['location', locationId],
+    queryFn: () => getLocationById(locationId!),
+    enabled: !!locationId && show,
+  });
+
+  const { data: dropdown, isLoading: isLoadingDropdown } = useQuery({
+    queryKey: ['dropdown'],
+    queryFn: () => getDropdown(),
+    enabled: show,
+  });
+
+  const categories =
+    dropdown?.data.kategoriAset.map((item) => ({
+      value: item,
+      label: item.charAt(0).toUpperCase() + item.slice(1), // biar huruf pertama kapital
+    })) ?? [];
 
   const queryClient = useQueryClient();
 
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: (data: LocationValues) => createLocation(data),
+    mutationFn: (data: LocationValues) =>
+      locationId === undefined
+        ? createLocation(data)
+        : updateLocation(data, locationId),
     onSuccess: (data) => {
       toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: ['location'] });
+      queryClient.invalidateQueries({ queryKey: ['locations'] });
     },
     onError: (error: any) => {
       toast.error(
         error?.response?.data?.message ||
           error?.message ||
-          'Menambah lokasi gagal'
+          `${locationId === undefined ? 'Menambah' : 'Edit'} lokasi gagal`
       );
     },
   });
-
-  // const { data, isLoading } = useQuery({
-  //   queryKey: ['category'],
-  //   queryFn: () =>
-  // })
 
   const onSubmit = (data: LocationValues) => {
     console.log(data);
     mutateAsync(data);
   };
 
-  
+  useEffect(() => {
+    if (show) {
+      if (isEdit && locationData?.data) {
+        reset({
+          lokasi: locationData.data.lokasi,
+          kategori: locationData.data.kategoriAset,
+        });
+      } else if (!isEdit) {
+        reset({
+          lokasi: '',
+          kategori: [],
+        });
+      }
+    }
+  }, [show, isEdit, locationData, reset]);
+
+  if (
+    !show ||
+    (isEdit && (isLoading || !locationData?.data || isLoadingDropdown))
+  ) {
+    return null;
+  }
 
   return (
     <div
@@ -96,8 +133,14 @@ export default function LocationForm({
           </button>
         </div>
         <div className='mt-[10px]'>
-          <p className='text-2xl font-medium'>Add Lokasi</p>
-          <p className='text-gray-400'>Create a new asset storage place</p>
+          <p className='text-2xl font-medium'>
+            {locationId ? 'Edit Lokasi' : 'Add Lokasi'}
+          </p>
+          <p className='text-gray-400'>
+            {locationId
+              ? 'Edit location info'
+              : 'Create a new asset storage place'}
+          </p>
         </div>
         <div>
           <form
@@ -142,8 +185,19 @@ export default function LocationForm({
                 )}
               </div>
               <div className='flex justify-end mt-3'>
-                <Button variant={'asa'} type='submit' className='w-fit'>
-                  Add Lokasi
+                <Button
+                  variant={'asa'}
+                  type='submit'
+                  className='w-fit'
+                  disabled={isPending}
+                >
+                  {locationId
+                    ? isPending
+                      ? 'Updating...'
+                      : 'Update Lokasi'
+                    : isPending
+                    ? 'Adding Location...'
+                    : 'Add Location'}
                 </Button>
               </div>
             </div>

@@ -1,4 +1,7 @@
+import type { BaseResponse } from '@/types/response';
 import z from 'zod';
+import type { Asset, AssetResponse, GetAssetParams } from './asset.type';
+import { privateInstance } from '@/lib/axios';
 
 const currentYear = new Date().getFullYear();
 
@@ -11,19 +14,21 @@ const ACCEPTED_IMAGE_TYPES = [
 ];
 
 export const AssetSchema = z.object({
-  lokasiId: z.string().nonempty({error: 'Lokasi wajib diisi'}),
-  kategoriAset: z.string().nonempty({error: 'Kategori aset wajib diisi'}),
+  lokasiId: z.string().nonempty({ error: 'Lokasi wajib diisi' }),
+  kategoriAset: z.string().nonempty({ error: 'Kategori aset wajib diisi' }),
   merkDanTipe: z.string().min(1, 'Merk & Tipe wajib diisi'),
   tahun: z
-    .number({error: 'Tahun pembuatan wajib diisi'})
+    .number({ error: 'Tahun pembuatan wajib diisi' })
     .int('Tahun harus berupa angka')
     .min(1900, 'Minimal tahun 1900')
     .max(currentYear, `Maksimal tahun ${currentYear}`),
-  kondisiAset: z.string().nonempty({error: 'Kondisi aset wajib diisi'}),
-  statusAset: z.string().nonempty({error: 'Status aset wajib diisi'}),
-  nomorSeri: z.string().nonempty({error: 'Nomor seri wajib diisi'}),
-  masaBerlaku: z.string().nonempty({error: 'Masa berlaku wajib diisi'}),
-  statusKepemilikan: z.string().nonempty({error: 'Status kepemilikan wajib diisi'}),
+  kondisiAset: z.string().nonempty({ error: 'Kondisi aset wajib diisi' }),
+  statusAset: z.string().nonempty({ error: 'Status aset wajib diisi' }),
+  nomorSeri: z.string().nonempty({ error: 'Nomor seri wajib diisi' }),
+  masaBerlaku: z.string().nonempty({ error: 'Masa berlaku wajib diisi' }),
+  statusKepemilikan: z
+    .string()
+    .nonempty({ error: 'Status kepemilikan wajib diisi' }),
   foto: z
     .array(z.instanceof(File))
     .min(1, { error: 'Upload foto minimal 1' }) // Validasi jumlah minimal
@@ -36,8 +41,11 @@ export const AssetSchema = z.object({
         files.every((file) => ACCEPTED_IMAGE_TYPES.includes(file.type)),
       'Hanya format .jpg, .jpeg, .png dan .webp yang didukung.'
     ),
-  // urlFoto: z.array(z.string()),
-  // urlQR: z.string()
 });
 
 export type AssetValues = z.infer<typeof AssetSchema>;
+
+export const getAssets = async (
+  params: GetAssetParams
+): Promise<AssetResponse<Asset[]>> =>
+  privateInstance.get('/aset', { params }).then((res) => res.data);

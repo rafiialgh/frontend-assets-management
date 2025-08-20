@@ -11,7 +11,7 @@ export default function LocationPage() {
   const [showModal, setShowModal] = useState(false);
 
   const { data, isLoading, error} = useQuery({
-    queryKey: ['location'],
+    queryKey: ['locations'],
     queryFn: () => getLocation(),
   })
 

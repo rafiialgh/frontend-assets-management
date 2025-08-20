@@ -9,7 +9,7 @@ type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
 
 const statusVariant: Record<string, BadgeVariant> = {
   aktif: 'active',
-  'non aktif': 'nonactive',
+  nonaktif: 'nonactive',
   maintenance: 'maintenanceOutline',
 };
 
@@ -24,7 +24,8 @@ export const columns: ColumnDef<Asset>[] = [
     )
   },
   {
-    accessorKey: 'lokasiId',
+    accessorFn: (row) => row.lokasi.lokasi,
+    id: 'lokasi',
     header: 'Lokasi',
   },
   {

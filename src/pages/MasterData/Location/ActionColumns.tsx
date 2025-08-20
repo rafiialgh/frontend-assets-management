@@ -3,7 +3,7 @@ import { Edit, Trash } from 'lucide-react';
 import { useState } from 'react';
 import LocationForm from './form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { deleteLocation } from '@/services/location/location.service';
+import { deleteLocation, getLocationById } from '@/services/location/location.service';
 import { toast } from 'sonner';
 
 interface ActionColumnProps {
@@ -18,7 +18,7 @@ export default function ActionColumns({ id }: ActionColumnProps) {
     mutationFn: () => deleteLocation(id),
     onSuccess: (data) => {
       toast.success(data.message)
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['locations'] });
     },
     onError: (error: any) => {
       toast.error(

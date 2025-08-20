@@ -272,7 +272,7 @@ export default function UserForm({
                     ? 'Loading...'
                     : userId
                     ? isPending
-                      ? 'Updating'
+                      ? 'Updating...'
                       : 'Update User'
                     : isPending
                     ? 'Adding User...'

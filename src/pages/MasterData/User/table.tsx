@@ -63,7 +63,7 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
   columns,
   data,
-  pagination, // Ambil props baru
+  pagination,
   roleFilter,
   setRoleFilter,
   searchFilter,

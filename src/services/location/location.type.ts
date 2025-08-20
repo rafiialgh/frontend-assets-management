@@ -1,5 +1,5 @@
 export interface Location {
-  idLokasi: number;
+  idLokasi: string;
   lokasi: string;
   kategoriAset: string[];
   totalAset: number;
