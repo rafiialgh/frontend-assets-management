@@ -9,20 +9,19 @@ import { DataTable } from './table';
 import { useDebounce } from '@/hooks/useDebounce';
 import { getUsers } from '@/services/auth/auth.service';
 import { useQuery } from '@tanstack/react-query';
-import { StatCardSkeleton, TableSkeleton } from '@/components/Skeleton';
 import type { GetUsersResponse } from '@/services/auth/auth.type';
 
 export default function UserPage() {
   const [roleFilter, setRoleFilter] = useState<string | undefined>(undefined);
+  const [showModal, setShowModal] = useState(false);
   const [page, setPage] = useState(1);
   const limit = 10;
-
   // State untuk input pencarian langsung
   const [search, setSearch] = useState<string>('');
   // State untuk nilai yang sudah di-debounce
   const debouncedSearch = useDebounce(search, 500); // Tunda 500ms
 
-  const { data, isLoading, error } = useQuery<GetUsersResponse>({
+  const { data, isLoading } = useQuery<GetUsersResponse>({
     queryKey: ['users', roleFilter, debouncedSearch, page, limit],
     queryFn: () =>
       getUsers({ role: roleFilter, search: debouncedSearch, page, limit }),
@@ -45,8 +44,6 @@ export default function UserPage() {
     setPage(1); // Reset halaman ke 1 setiap kali pencarian dimulai
     setSearch(value);
   };
-
-  const [showModal, setShowModal] = useState(false);
 
   return (
     <div className='text-accent-foreground'>
@@ -92,6 +89,12 @@ export default function UserPage() {
             <Badge variant={'maintenance'}>Maintenance</Badge>
             <p className='text-2xl text-right'>
               {summary?.totalMaintenance ?? 0}
+            </p>
+          </div>
+          <div>
+            <Badge variant={'user'}>User</Badge>
+            <p className='text-2xl text-right'>
+              {summary?.totalUserBiasa ?? 0}
             </p>
           </div>
         </div>

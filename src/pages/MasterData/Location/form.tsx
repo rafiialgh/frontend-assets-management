@@ -14,7 +14,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Label } from '@radix-ui/react-label';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -54,6 +54,8 @@ export default function LocationForm({
     enabled: !!locationId && show,
   });
 
+  console.log(locationData)
+
   const { data: dropdown, isLoading: isLoadingDropdown } = useQuery({
     queryKey: ['dropdown'],
     queryFn: () => getDropdown(),
@@ -61,9 +63,9 @@ export default function LocationForm({
   });
 
   const categories =
-    dropdown?.data.kategoriAset.map((item) => ({
-      value: item,
-      label: item.charAt(0).toUpperCase() + item.slice(1), // biar huruf pertama kapital
+    dropdown?.data.subKategoriAset.map((item) => ({
+      value: item.subAsetId,
+      label: item.nameSubAset,
     })) ?? [];
 
   const queryClient = useQueryClient();
@@ -76,6 +78,7 @@ export default function LocationForm({
     onSuccess: (data) => {
       toast.success(data.message);
       queryClient.invalidateQueries({ queryKey: ['locations'] });
+      onClose();
     },
     onError: (error: any) => {
       toast.error(
@@ -96,7 +99,7 @@ export default function LocationForm({
       if (isEdit && locationData?.data) {
         reset({
           lokasi: locationData.data.lokasi,
-          kategori: locationData.data.kategoriAset,
+          kategori: locationData.data.subKategoriAset.map((item: any) => item.nameSubAset),
         });
       } else if (!isEdit) {
         reset({
@@ -165,25 +168,27 @@ export default function LocationForm({
                   </p>
                 )}
               </div>
+              {isEdit && (
+                <div className='grid gap-3'>
+                  <Label htmlFor='role'>
+                    Kategori Aset <span className='text-red-500'>*</span>
+                  </Label>
+                  <MultiSelectCategories
+                    selectedCategories={watch('kategori') || []}
+                    onCategoriesChange={(vals) =>
+                      setValue('kategori', vals ?? [])
+                    }
+                    placeholder='e.g Kategori 1, Kategori 2'
+                    category={categories}
+                  />
+                  {errors.kategori && (
+                    <p className='text-red-500 text-sm'>
+                      {errors.kategori.message}
+                    </p>
+                  )}
+                </div>
+              )}
 
-              <div className='grid gap-3'>
-                <Label htmlFor='role'>
-                  Kategori Aset <span className='text-red-500'>*</span>
-                </Label>
-                <MultiSelectCategories
-                  selectedCategories={watch('kategori') || []}
-                  onCategoriesChange={(vals) =>
-                    setValue('kategori', vals ?? [])
-                  }
-                  placeholder='e.g Kategori 1, Kategori 2'
-                  category={categories}
-                />
-                {errors.kategori && (
-                  <p className='text-red-500 text-sm'>
-                    {errors.kategori.message}
-                  </p>
-                )}
-              </div>
               <div className='flex justify-end mt-3'>
                 <Button
                   variant={'asa'}

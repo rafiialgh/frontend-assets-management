@@ -2,7 +2,7 @@ import { StatCard } from '@/components/StatCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Boxes, CircleDotDashed, Plus, SquareStack } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AssetTable } from './table';
 import { columns } from './columns';
 import { Link } from 'react-router-dom';
@@ -17,20 +17,47 @@ export default function Aset() {
   const [recentFilter, setRecentFilter] = useState<string | undefined>(
     undefined
   );
-  const [locationFilter, setLocationFilter] = useState<string | undefined>(undefined)
-  const [categoryFilter, setCategoryFilter] = useState<string | undefined>(undefined)
-  const [conditionFilter, setConditionFilter] = useState<string | undefined>(undefined)
-  const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined)
+  const [locationFilter, setLocationFilter] = useState<string | undefined>(
+    undefined
+  );
+  const [categoryFilter, setCategoryFilter] = useState<string | undefined>(
+    undefined
+  );
+  const [conditionFilter, setConditionFilter] = useState<string | undefined>(
+    undefined
+  );
+  const [statusFilter, setStatusFilter] = useState<string | undefined>(
+    undefined
+  );
   const debouncedSearch = useDebounce(search, 500);
   const limit = 10;
 
   const { data, isLoading } = useQuery({
-    queryKey: ['assets', categoryFilter, statusFilter, conditionFilter, recentFilter, locationFilter, debouncedSearch, page, limit],
+    queryKey: [
+      'assets',
+      categoryFilter,
+      statusFilter,
+      conditionFilter,
+      recentFilter,
+      locationFilter,
+      debouncedSearch,
+      page,
+      limit,
+    ],
     queryFn: () =>
-      getAssets({ kategori: categoryFilter, status: statusFilter, kondisi: conditionFilter, recent: recentFilter, lokasi: locationFilter,  search: debouncedSearch,  page, limit }),
+      getAssets({
+        kategori: categoryFilter,
+        status: statusFilter,
+        kondisi: conditionFilter,
+        recent: recentFilter,
+        lokasi: locationFilter,
+        search: debouncedSearch,
+        page,
+        limit,
+      }),
   });
 
-  const { data: dropdown, isLoading: isLoadingDropdown } = useQuery({
+  const { data: dropdown } = useQuery({
     queryKey: ['dropdown'],
     queryFn: () => getDropdown(),
   });
@@ -149,6 +176,7 @@ export default function Aset() {
           isLoading={isLoading}
         />
       </div>
+      
     </div>
   );
 }

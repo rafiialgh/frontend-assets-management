@@ -8,9 +8,10 @@ import { toast } from 'sonner';
 
 interface ActionColumnProps {
   id: string;
+  asset: string;
 }
 
-export default function ActionColumns({ id }: ActionColumnProps) {
+export default function ActionColumns({ id, asset }: ActionColumnProps) {
   const [showModal, setShowModal] = useState(false);
   const queryClient = useQueryClient();
 
@@ -32,12 +33,19 @@ export default function ActionColumns({ id }: ActionColumnProps) {
     await mutateAsync();
   };
 
+  console.log(asset)
+  const isDigital = asset?.toLowerCase().replace(/\s/g, '') === 'asetdigital';
+  console.log(isDigital)
+
   return (
     <>
-      <div className='inline-flex items-center gap-4 p-5'>
-        <Button size='sm' variant='secondary' className='hover:bg-gray-200'>
-          <Eye />
-        </Button>
+      <div className='inline-flex items-center gap-4 p-5 justify-end w-full'>
+        {!isDigital && (
+          <Button size='sm' variant='secondary' className='hover:bg-gray-200'>
+            <Eye />
+          </Button>
+        )}
+
         <Button
           size='sm'
           variant='secondary'

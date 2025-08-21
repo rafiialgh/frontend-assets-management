@@ -37,7 +37,7 @@ interface MultiSelectCategoriesProps {
   onCategoriesChange: (categories: string[]) => void;
   placeholder?: string;
   className?: string;
-  category: { value: string; label: string }[]
+  category: { value: string; label: string }[];
 }
 
 export function MultiSelectCategories({
@@ -71,48 +71,50 @@ export function MultiSelectCategories({
 
   return (
     <div className={cn('w-full', className)}>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant='outline'
-            role='combobox'
-            aria-expanded={open}
-            className='w-full justify-between min-h-10 h-auto bg-transparent'
-          >
-            <div className='flex flex-wrap gap-1 flex-1'>
-              {selectedCategories.length === 0 ? (
-                <span className='text-muted-foreground font-normal'>
-                  {placeholder}
-                </span>
-              ) : (
-                selectedCategories.map((categoryValue) => {
-                  const category = categories.find(
-                    (cat) => cat.value === categoryValue
-                  );
-                  return (
-                    <Badge
-                      key={categoryValue}
-                      variant='secondary'
-                      className='text-xs'
-                    >
-                      {category?.label || categoryValue}
-                      <span
-                        className='ml-1 cursor-pointer ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
-                        role='button'
-                        onClick={() => handleRemove(categoryValue)}
-                        onMouseDown={(e) => e.preventDefault()}
-                      >
-                        <X className='h-3 w-3 text-muted-foreground hover:text-foreground' />
-                      </span>
-                    </Badge>
-                  );
-                })
-              )}
-            </div>
-            <ChevronsUpDown className='h-4 w-4 shrink-0 opacity-50' />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className='w-full p-0' align='start'>
+      {/* <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild> */}
+      <Button
+        disabled
+        type='button'
+        variant='outline'
+        role='combobox'
+        // aria-expanded={open}
+        className='w-full justify-between min-h-10 h-auto bg-transparent'
+      >
+        <div className='flex flex-wrap gap-1 flex-1'>
+          {selectedCategories.length === 0 ? (
+            <span className='text-muted-foreground font-normal'>
+              {placeholder}
+            </span>
+          ) : (
+            selectedCategories.map((categoryValue) => {
+              const category = categories.find(
+                (cat) => cat.value === categoryValue
+              );
+              return (
+                <Badge
+                  key={categoryValue}
+                  variant='secondary'
+                  className='text-xs'
+                >
+                  {category?.label || categoryValue}
+                  <span
+                    className='ml-1 cursor-pointer ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
+                    role='button'
+                    onClick={() => handleRemove(categoryValue)}
+                    onMouseDown={(e) => e.preventDefault()}
+                  >
+                    <X className='h-3 w-3 text-muted-foreground hover:text-foreground' />
+                  </span>
+                </Badge>
+              );
+            })
+          )}
+        </div>
+        {/* <ChevronsUpDown className='h-4 w-4 shrink-0 opacity-50' /> */}
+      </Button>
+      {/* </PopoverTrigger> */}
+      {/* <PopoverContent className='w-full p-0' align='start'>
           <Command>
             <CommandInput placeholder='Search categories...' />
             <CommandList>
@@ -139,7 +141,7 @@ export function MultiSelectCategories({
             </CommandList>
           </Command>
         </PopoverContent>
-      </Popover>
+      </Popover> */}
     </div>
   );
 }

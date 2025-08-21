@@ -139,8 +139,6 @@ export function AssetTable<TData, TValue>({
     return pages;
   };
 
-  console.log(dropdown?.kategoriAset);
-
   return (
     <div className='space-y-4'>
       <div className='flex flex-col 2xl:flex-row items-center justify-between gap-3'>
@@ -194,9 +192,9 @@ export function AssetTable<TData, TValue>({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value='kategori'>Kategori</SelectItem>
-              {dropdown?.kategoriAset?.map((kat, index) => (
-                <SelectItem key={index} value={kat} className='capitalize'>
-                  {kat}
+              {dropdown?.subKategoriAset?.map((kat, index) => (
+                <SelectItem key={index} value={kat.subAsetId} className='capitalize'>
+                  {kat.nameSubAset}
                 </SelectItem>
               ))}
             </SelectContent>

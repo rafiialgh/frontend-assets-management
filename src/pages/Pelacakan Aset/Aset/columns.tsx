@@ -17,16 +17,7 @@ export const columns: ColumnDef<Asset>[] = [
   {
     accessorKey: 'asetId',
     header: 'Asset ID',
-    cell: ({ row }) => (
-        <p className='text-gray-400'>
-          {row.original.asetId}
-        </p>
-    )
-  },
-  {
-    accessorFn: (row) => row.lokasi.lokasi,
-    id: 'lokasi',
-    header: 'Lokasi',
+    cell: ({ row }) => <p className='text-gray-400'>{row.original.asetId}</p>,
   },
   {
     accessorKey: 'kategoriAset',
@@ -35,7 +26,12 @@ export const columns: ColumnDef<Asset>[] = [
       <Badge className='capitalize' variant={'outline'}>
         {row.original.kategoriAset}
       </Badge>
-    )
+    ),
+  },
+  {
+    accessorFn: (row) => row.lokasi?.lokasi ?? '-',
+    id: 'lokasi',
+    header: 'Lokasi',
   },
   {
     accessorKey: 'merkDanTipe',
@@ -44,40 +40,37 @@ export const columns: ColumnDef<Asset>[] = [
   {
     accessorKey: 'tahun',
     header: 'Thn. Pembuatan',
-    cell: ({ row }) => (
-      <p className='text-gray-400'>
-        {row.original.tahun}
-      </p>
-    )
+    cell: ({ row }) => <p className='text-gray-400'>{row.original.tahun ?? '-'}</p>,
   },
   {
     accessorKey: 'kondisiAset',
     header: 'Kondisi',
     cell: ({ row }) => {
-    const kondisi = row.original.kondisiAset?.toLowerCase();
+      const kondisi = row.original.kondisiAset?.toLowerCase();
 
-    const color =
-      kondisi === 'baik'
-        ? 'text-green-500'
-        : kondisi === 'buruk'
-        ? 'text-red-500'
-        : 'text-gray-500';
+      const color =
+        kondisi === 'baik'
+          ? 'text-green-500'
+          : kondisi === 'buruk'
+          ? 'text-red-500'
+          : 'text-gray-500';
 
-    return (
-      <p className={`${color} capitalize`}>
-        {row.original.kondisiAset}
-      </p>
-    );
-  }
+      return (
+        <p className={`${color} capitalize`}>{row.original.kondisiAset ?? '-'}</p>
+      );
+    },
   },
   {
     accessorKey: 'statusAset',
     header: 'Status',
     cell: ({ row }) => (
-      <Badge variant={statusVariant[row.original.statusAset]} className='capitalize'>
-        {row.original.statusAset}
+      <Badge
+        variant={statusVariant[row.original.statusAset]}
+        className='capitalize'
+      >
+        {row.original.statusAset ?? '-'}
       </Badge>
-    )
+    ),
   },
   {
     id: 'actions',
@@ -85,7 +78,7 @@ export const columns: ColumnDef<Asset>[] = [
     cell: ({ row }) => {
       const asset = row.original;
 
-      return <ActionColumns id={String(asset.asetId)} />;
+      return <ActionColumns id={String(asset.asetId)} asset={asset.kategoriAset} />;
     },
   },
 ];

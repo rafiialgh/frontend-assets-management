@@ -1,18 +1,21 @@
-import type { Location } from "../location/location.type"
+import type { Location, SubCategory } from '../location/location.type';
+
+
 
 export interface Asset {
-  asetId: string
-  lokasi: Pick<Location, 'lokasi'>
-  kategoriAset: string
-  merkDanTipe: string
-  tahun: number
-  kondisiAset: string
-  statusAset: string
-  nomorSeri?: string
-  masaBerlaku?: string
-  statusKepemilikan?: string
-  urlFoto?: string[]
-  urlQR?: string
+  asetId: string;
+  lokasi: Pick<Location, 'lokasi'>;
+  kategoriAset: string;
+  subKategoriAset: Pick<SubCategory, 'nameSubAset'>;
+  merkDanTipe: string;
+  tahun: number;
+  kondisiAset: string;
+  statusAset: string;
+  nomorSeri?: string;
+  masaBerlaku?: string;
+  statusKepemilikan?: string;
+  urlFoto?: string[];
+  urlQR?: string;
 }
 
 export type Pagination = {
@@ -25,10 +28,10 @@ export type Pagination = {
 export type Summary = {
   totalAset: number;
   totalKategori: number;
-  totalStatusAktif: number
-  totalStatusMaintenance: number
-  totalStatusNonaktif: number
-}
+  totalStatusAktif: number;
+  totalStatusMaintenance: number;
+  totalStatusNonaktif: number;
+};
 
 export type AssetResponse<T> = {
   data: T;

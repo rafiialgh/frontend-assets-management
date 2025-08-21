@@ -10,7 +10,7 @@ import { getLocation } from '@/services/location/location.service'
 export default function LocationPage() {
   const [showModal, setShowModal] = useState(false);
 
-  const { data, isLoading, error} = useQuery({
+  const { data, isLoading} = useQuery({
     queryKey: ['locations'],
     queryFn: () => getLocation(),
   })
@@ -35,7 +35,7 @@ export default function LocationPage() {
 
       <div className='w-full p-5 bg-sidebar border rounded-sm mt-5'>
         <h1 className='font-medium text-xl mb-5'>Lokasi Penempatan <span className='font-light text-gray-400 text-lg'>{`[${data?.totalLokasi ?? 0}]`}</span></h1>
-        <DataTable columns={columns} data={data?.data ?? []} />
+        <DataTable isLoading={isLoading} columns={columns} data={data?.data ?? []} />
       </div>
 
       {/* Modal */}

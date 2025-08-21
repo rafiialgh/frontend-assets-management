@@ -9,12 +9,10 @@ import type {
 } from './auth.type';
 import { globalInstance, privateInstance } from '@/lib/axios';
 
-export const roles = ['admin', 'superadmin', 'maintenance'] as const;
-
 export const authSchema = z.object({
   name: z.string().min(5, { message: 'Name must be at least 5 characters' }),
   email: z.email({ message: 'Invalid email address' }),
-  role: z.enum(roles, { message: 'Invalid option' }),
+  role: z.string({ message: 'Role is required' }),
 });
 
 export const addUserSchema = authSchema.extend({

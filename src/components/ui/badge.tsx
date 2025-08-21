@@ -17,6 +17,7 @@ const badgeVariants = cva(
           'border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
         outline:
           'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
+        user: 'bg-[#66956D] text-white hover:bg-[#66956D]/90 border-transparent',
         admin: 'bg-[#277292] text-white hover:bg-[#277292]/90 border-transparent',
         superadmin: 'bg-[#163551] text-white hover:bg-[#163551]/90 border-transparent',
         maintenance: 'bg-[#D1A061] text-white hover:bg-[#D1A061]/90 border-transparent',

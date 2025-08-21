@@ -18,16 +18,16 @@ export const columns: ColumnDef<Location>[] = [
     },
   },
   {
-    accessorKey: 'kategoriAset',
-    header: 'Kategori Aset',
+    accessorKey: 'subKategoriAset',
+    header: 'Sub Kategori Aset',
     cell: ({ row }) => {
-      const category = row.original.kategoriAset;
+      const subCategory = row.original.subKategoriAset;
 
       return (
         <div className='flex gap-1 flex-wrap'>
-          {category.map((cat, idx) => (
+          {subCategory.map((cat, idx) => (
             <Badge key={idx} variant='outline' className='capitalize'>
-              {cat}
+              {cat.nameSubAset}
             </Badge>
           ))}
         </div>

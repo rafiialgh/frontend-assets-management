@@ -1,7 +1,14 @@
+export interface SubCategory {
+  subAsetId: string;
+  nameSubAset: string;
+  createAt: string;
+}
+
 export interface Location {
   idLokasi: string;
   lokasi: string;
-  kategoriAset: string[];
+  kategoriAset: string;
+  subKategoriAset: SubCategory[];
   totalAset: number;
 }
 

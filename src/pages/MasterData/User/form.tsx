@@ -19,15 +19,14 @@ import {
   updateUsers,
   type UpdateUserValues,
 } from '@/services/auth/auth.service';
+import { getDropdown } from '@/services/global/global.service';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Label } from '@radix-ui/react-label';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Eye, EyeOff, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import z from 'zod';
 
 interface UserFormProps extends React.ComponentProps<'form'> {
   onClose: () => void;
@@ -63,16 +62,11 @@ export default function UserForm({
     },
   });
 
-  const navigate = useNavigate();
-
   const [showPassword, setShowPassword] = useState(false);
 
-  const queryClient = useQueryClient(); 
+  const queryClient = useQueryClient();
 
-  const {
-    data: userData,
-    isFetching,
-  } = useQuery({
+  const { data: userData, isFetching } = useQuery({
     queryKey: ['user', userId],
     queryFn: () => getUserById(userId!),
     enabled: !!userId && show,
@@ -80,8 +74,16 @@ export default function UserForm({
     // staleTime: 0,
   });
 
-  const { mutateAsync, isPending } = useMutation({
+  console.log(userData);
 
+  const { data: dropdown } = useQuery({
+    queryKey: ['dropdown'],
+    queryFn: () => getDropdown(),
+  });
+
+  console.log(dropdown);
+
+  const { mutateAsync, isPending } = useMutation({
     mutationFn: (data: FormValues) => {
       if (isEdit) {
         return updateUsers(data as UpdateUserValues, userId!);
@@ -105,11 +107,19 @@ export default function UserForm({
   const onSubmit = async (data: FormValues) => {
     const payload = { ...data };
 
+    if (payload.role) {
+      payload.role = normalizeRole(payload.role);
+    }
+
     if (isEdit && (!payload.password || payload.password.trim() === '')) {
       delete payload.password;
     }
 
     await mutateAsync(payload);
+  };
+
+  const normalizeRole = (role: string) => {
+    return role.toLowerCase().replace(/\s+/g, '');
   };
 
   useEffect(() => {
@@ -118,7 +128,7 @@ export default function UserForm({
         reset({
           name: userData.data.name,
           email: userData.data.email,
-          role: userData.data.role as 'admin' | 'superadmin' | 'maintenance',
+          role: userData.data.role.userRoleId,
           password: '',
         });
       } else if (!isEdit) {
@@ -245,13 +255,14 @@ export default function UserForm({
                       <SelectContent>
                         <SelectGroup>
                           <SelectLabel>Role</SelectLabel>
-                          <SelectItem value='admin'>Admin</SelectItem>
-                          <SelectItem value='superadmin'>
-                            Super Admin
-                          </SelectItem>
-                          <SelectItem value='maintenance'>
-                            Maintenance
-                          </SelectItem>
+                          {dropdown?.data.userRole.map((role) => (
+                            <SelectItem
+                              key={role.userRoleId}
+                              value={role.userRoleId}
+                            >
+                              {role.nameRole}
+                            </SelectItem>
+                          ))}
                         </SelectGroup>
                       </SelectContent>
                     </Select>

@@ -2,15 +2,16 @@ import type { ColumnDef } from '@tanstack/react-table';
 import ActionColumns from './ActionColumns';
 import { Badge, badgeVariants } from '@/components/ui/badge';
 import type { VariantProps } from 'class-variance-authority';
-import { formatDateTime } from '@/lib/utils';
+import { cn, formatDateTime } from '@/lib/utils';
 import type { UserType } from '@/services/auth/auth.type';
 
 type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
 
 const roleVariant: Record<string, BadgeVariant> = {
-  admin: 'admin',
-  superadmin: 'superadmin',
-  maintenance: 'maintenance',
+  Admin: 'admin',
+  'Super Admin': 'superadmin',
+  Maintenance: 'maintenance',
+  User: 'user'
 };
 
 export const columns: ColumnDef<UserType>[] = [
@@ -30,15 +31,16 @@ export const columns: ColumnDef<UserType>[] = [
     accessorKey: 'role',
     header: 'Role',
     cell: ({ row }) => (
-      <Badge variant={roleVariant[row.original.role]}>
-        {row.original.role}
+      <Badge variant={roleVariant[row.original.role.nameRole]}>
+        {row.original.role.nameRole}
       </Badge>
     ),
   },
   {
     accessorKey: 'lastLogin',
     header: 'Last Login',
-    cell: ({ row }) => formatDateTime(row.original.lastLogin),
+    cell: ({ row }) => row.original.lastLogin ? formatDateTime(row.original.lastLogin) : '-',
+
   },
   {
     accessorKey: 'status',
@@ -48,11 +50,12 @@ export const columns: ColumnDef<UserType>[] = [
 
       return (
         <span
-          className={
-            status == 'Online'
+          className={cn(
+            'capitalize',
+            status == 'aktif'
               ? 'text-green-500 font-medium'
               : 'text-gray-500 font-medium'
-          }
+          )}
         >
           {status}
         </span>
