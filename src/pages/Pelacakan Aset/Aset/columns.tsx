@@ -78,7 +78,7 @@ export const columns: ColumnDef<Asset>[] = [
     cell: ({ row }) => {
       const asset = row.original;
 
-      return <ActionColumns id={String(asset.asetId)} asset={asset.kategoriAset} />;
+      return <ActionColumns id={asset.asetId} asset={asset.kategoriAset} />;
     },
   },
 ];

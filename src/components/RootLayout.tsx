@@ -1,6 +1,6 @@
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/app-sidebar';
-import { Link, Outlet, useLocation, useMatches } from 'react-router-dom';
+import { Link, Outlet, useMatches } from 'react-router-dom';
 import React from 'react';
 import {
   Breadcrumb,

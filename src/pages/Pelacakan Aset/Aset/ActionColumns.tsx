@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteLocation } from '@/services/location/location.service';
 import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
 
 interface ActionColumnProps {
   id: string;
@@ -33,16 +34,18 @@ export default function ActionColumns({ id, asset }: ActionColumnProps) {
     await mutateAsync();
   };
 
-  console.log(asset)
+  console.log(asset);
   const isDigital = asset?.toLowerCase().replace(/\s/g, '') === 'asetdigital';
-  console.log(isDigital)
+  console.log(isDigital);
 
   return (
     <>
       <div className='inline-flex items-center gap-4 p-5 justify-end w-full'>
         {!isDigital && (
-          <Button size='sm' variant='secondary' className='hover:bg-gray-200'>
-            <Eye />
+          <Button size='sm' variant='secondary' className='hover:bg-gray-200' asChild>
+            <Link to={`/aset/${id}`}>
+              <Eye />
+            </Link>
           </Button>
         )}
 
@@ -50,9 +53,12 @@ export default function ActionColumns({ id, asset }: ActionColumnProps) {
           size='sm'
           variant='secondary'
           className='hover:bg-yellow-400'
-          onClick={() => setShowModal(true)}
+          asChild
+          // onClick={() => setShowModal(true)}
         >
-          <Edit className='w-4 h-4' />
+          <Link to={`/aset/edit/${id}`}>
+            <Edit className='w-4 h-4' />
+          </Link>
           {/* Edit */}
         </Button>
         <Button

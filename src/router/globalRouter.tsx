@@ -1,4 +1,4 @@
-import type { RouteObject } from 'react-router-dom';
+import { redirect, type RouteObject } from 'react-router-dom';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
 import RootLayout from '@/components/RootLayout';
@@ -11,6 +11,7 @@ import Aset from '@/pages/Pelacakan Aset/Aset';
 import Perpindahan from '@/pages/Pelacakan Aset/Perpindahan';
 import Notifikasi from '@/pages/Pelacakan Aset/Notifikasi';
 import AsetForm from '@/pages/Pelacakan Aset/Aset/form';
+import ViewAsset from '@/pages/Pelacakan Aset/Aset/view';
 
 const globalRoutes: RouteObject[] = [
   {
@@ -68,27 +69,51 @@ const globalRoutes: RouteObject[] = [
             children: [
               {
                 index: true,
-                element: <Aset />
+                element: <Aset />,
               },
               {
-                path: 'tambah',
+                path: 'add',
                 element: <AsetForm />,
-                handle: { breadcrumb: 'Tambah' }
-              }
-            ]
+                handle: { breadcrumb: 'Add' },
+              },
+              {
+                path: '/aset/:id',
+                loader: async ({ params }) => {
+                  if (!params.id) {
+                    throw redirect('/aset');
+                  }
+
+                  return params.id;
+                },
+                element: <ViewAsset />,
+                handle: { breadcrumb: 'Detail' },
+              },
+              {
+                path: '/aset/edit/:id',
+                loader: async ({ params }) => {
+                  if (!params.id) {
+                    throw redirect('/aset');
+                  }
+
+                  return params.id;
+                },
+                element: <AsetForm />,
+                handle: { breadcrumb: 'Edit' },
+              },
+            ],
           },
           {
             path: 'perpindahan',
             element: <Perpindahan />,
-            handle: { breadcrumb: 'Perpindahan' }
+            handle: { breadcrumb: 'Perpindahan' },
           },
           {
             path: 'notifikasi',
             element: <Notifikasi />,
-            handle: { breadcrumb: 'Notifikasi' }
+            handle: { breadcrumb: 'Notifikasi' },
           },
-        ]
-      }
+        ],
+      },
     ],
   },
 ];

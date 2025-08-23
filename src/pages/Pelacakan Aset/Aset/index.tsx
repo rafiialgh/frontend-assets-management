@@ -103,7 +103,7 @@ export default function Aset() {
     <div className='text-accent-foreground'>
       <div className='flex justify-between'>
         <h1 className='text-3xl font-medium'>Aset</h1>
-        <Link to={'/aset/tambah'}>
+        <Link to={'/aset/add'}>
           <Button
             type='button'
             variant={'asa'}

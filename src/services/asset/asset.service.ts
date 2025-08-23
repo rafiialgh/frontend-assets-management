@@ -1,4 +1,3 @@
-import type { BaseResponse } from '@/types/response';
 import z from 'zod';
 import type { Asset, AssetResponse, GetAssetParams } from './asset.type';
 import { privateInstance } from '@/lib/axios';
@@ -26,10 +25,13 @@ export const AssetSchema = z
     // Aset fisik
     lokasiId: z.string().optional(),
     tahun: z
-    .number({ error: 'Tahun pembuatan wajib diisi' })
-    .int('Tahun harus berupa angka')
-    .min(1900, 'Minimal tahun 1900')
-    .max(currentYear, `Maksimal tahun ${currentYear}`).optional(),
+      .string()
+      .optional()
+      .refine((val) => {
+        if (!val || val.trim() === '') return true;
+        const num = parseInt(val, 10);
+        return !isNaN(num) && num >= 1900 && num <= currentYear;
+      }, `Tahun harus berupa angka antara 1900 - ${currentYear}`),
     statusAset: z.string().optional(),
     kondisiAset: z.string().optional(),
     nomorSeri: z.string().optional(),

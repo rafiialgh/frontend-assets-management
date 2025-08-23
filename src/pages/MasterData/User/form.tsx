@@ -1,4 +1,11 @@
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -23,7 +30,7 @@ import { getDropdown } from '@/services/global/global.service';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Label } from '@radix-ui/react-label';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Eye, EyeOff, X } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -66,7 +73,7 @@ export default function UserForm({
 
   const queryClient = useQueryClient();
 
-  const { data: userData, isFetching } = useQuery({
+  const { data: userData, isLoading: isLoadingUserData } = useQuery({
     queryKey: ['user', userId],
     queryFn: () => getUserById(userId!),
     enabled: !!userId && show,
@@ -76,7 +83,7 @@ export default function UserForm({
 
   console.log(userData);
 
-  const { data: dropdown } = useQuery({
+  const { data: dropdown, isLoading: isLoadingDropdown } = useQuery({
     queryKey: ['dropdown'],
     queryFn: () => getDropdown(),
   });
@@ -142,37 +149,25 @@ export default function UserForm({
     }
   }, [show, isEdit, userData, reset]);
 
-  if (!show) {
+  if (
+    !show ||
+    (isEdit && (isLoadingUserData || !userData?.data || isLoadingDropdown))
+  ) {
     return null;
   }
 
   return (
-    <div
-      className={`fixed inset-0 bg-black/50 z-50 flex justify-center items-center text-accent-foreground transition-opacity duration-300 ${
-        show
-          ? 'opacity-100 pointer-events-auto'
-          : 'opacity-0 pointer-events-none hidden'
-      }`}
-      onClick={onClose}
-    >
-      <div
-        className='flex flex-col bg-white m-5 w-full h-fit max-w-[400px] rounded-sm p-5'
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className='flex justify-end'>
-          <button type='button' onClick={onClose}>
-            <X className='text-gray-500' />
-          </button>
-        </div>
-        <div className='mt-[10px]'>
-          <p className='text-2xl font-medium'>
+    <Dialog open={show} onOpenChange={onClose}>
+      <DialogContent className='sm:max-w-[425px]'>
+        <DialogHeader>
+          <DialogTitle className='flex items-center gap-2'>
+            {/* {category === "Physical" ? <Package className="h-5 w-5" /> : <HardDrive className="h-5 w-5" />} */}
             {userId ? 'Edit User' : 'Add User'}
-          </p>
-          <p className='text-gray-400'>
+          </DialogTitle>
+          <DialogDescription>
             {userId ? 'Edit user info' : 'Assign user a role'}
-          </p>
-        </div>
-        <div>
+          </DialogDescription>
+        </DialogHeader>
           <form
             onSubmit={handleSubmit(onSubmit)}
             className={cn('flex flex-col gap-6', className)}
@@ -277,9 +272,9 @@ export default function UserForm({
                   variant={'asa'}
                   type='submit'
                   className='w-fit'
-                  disabled={isPending || isFetching}
+                  disabled={isPending || isLoadingUserData}
                 >
-                  {isFetching
+                  {isLoadingUserData
                     ? 'Loading...'
                     : userId
                     ? isPending
@@ -292,8 +287,7 @@ export default function UserForm({
               </div>
             </div>
           </form>
-        </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
